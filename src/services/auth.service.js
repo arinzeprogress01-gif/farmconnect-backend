@@ -3,6 +3,9 @@ import {
     findUserByEmail,
 } from "../repositories/user.repository.js";
 
+
+import { UnauthorizedError } from "../errors/unauthorized-error.js";
+
 import { ConflictError } from "../errors/conflict-error.js";
 
 import {
@@ -73,13 +76,12 @@ const register = async (payload) => {
 
 };
 
+export const login = async ({ email, password }) => {
 
-const login = async ({ email, password }) => {
-
-    const user = await findUserByEmail(email);
+    const user = await findUserByEmail(email, true);
 
     if (!user) {
-        throw new Error("Invalid email or password.");
+        throw new UnauthorizedError("Invalid email or password.");
     }
 
     const passwordMatch = await comparePassword(
@@ -88,7 +90,7 @@ const login = async ({ email, password }) => {
     );
 
     if (!passwordMatch) {
-        throw new Error("Invalid email or password.");
+        throw new UnauthorizedError("Invalid email or password.");
     }
 
     const token = generateToken({
@@ -97,6 +99,7 @@ const login = async ({ email, password }) => {
     });
 
     return {
+
         user: {
             id: user._id,
             fullName: user.fullName,
@@ -104,11 +107,9 @@ const login = async ({ email, password }) => {
             phone: user.phone,
             role: user.role,
         },
-        token,
-    };
-};
 
-export {
-    register,
-    login,
+        token,
+
+    };
+
 };

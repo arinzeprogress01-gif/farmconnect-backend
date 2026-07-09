@@ -1,7 +1,7 @@
-import joi from "joi"
+import Joi from "joi"
 import ROLES from "../constants/roles.js"
 
-const registerSchema = Joi.object({
+export const registerSchema = Joi.object({
     fullName: Joi.string()
         .trim()
         .min(3)
@@ -56,7 +56,7 @@ const registerSchema = Joi.object({
     })
 });
 
-const loginSchema = Joi.Object({
+export const loginSchema = Joi.object({
 
     email: Joi.string()
         .email()
@@ -68,8 +68,3 @@ const loginSchema = Joi.Object({
 });
 
 
-
-export {
-    registerSchema,
-    loginSchema
-};
