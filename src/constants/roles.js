@@ -1,4 +1,4 @@
-const ROLES = {
+export const ROLES = {
     USER: "user",
     VENDOR: "vendor"
 };

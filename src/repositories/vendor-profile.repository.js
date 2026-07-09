@@ -1,4 +1,4 @@
-const VendorProfile = require("../models/vendorProfile.model");
+import VendorProfile from "../models/vendor.model.js";
 
 const createVendorProfile = async (vendorData) => {
     return await VendorProfile.create(vendorData);

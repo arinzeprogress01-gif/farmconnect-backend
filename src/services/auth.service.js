@@ -9,11 +9,11 @@ import {
     createVendorProfile,
 } from "../repositories/vendor-profile.repository.js";
 
-import { hashPassword } from "../utils/password.util.js";
+import { hashPassword, comparePassword } from "../utils/password.utils.js";
 
-import { generateToken } from "../utils/jwt.util.js";
+import { generateToken } from "../utils/jwt.utils.js";
 
-import { ROLES } from "../constants/roles.constant.js";
+import { ROLES } from "../constants/roles.js";
 
 
 const register = async (payload) => {

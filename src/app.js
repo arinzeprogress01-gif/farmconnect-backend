@@ -14,7 +14,9 @@ app.use(helmet());
 
 app.use(cors());
 
-app.use(morgan("dev"));
+if (process.env.NODE_ENV === "development") {
+    app.use(morgan("dev"));
+}
 
 app.use(express.json());
 
@@ -26,7 +28,6 @@ app.get("/", (req, res) => {
         message: "FarmConnect API Running...",
     });
 });
-
 app.use("/api/v1/auth", authRoutes);
 
 app.use(notFound);

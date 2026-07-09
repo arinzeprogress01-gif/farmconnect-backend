@@ -1,5 +1,5 @@
 import joi from "joi"
-import ROLES from "../constants/roles"
+import ROLES from "../constants/roles.js"
 
 const registerSchema = Joi.object({
     fullName: Joi.string()

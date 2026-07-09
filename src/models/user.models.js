@@ -1,4 +1,4 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema(
   {
@@ -33,8 +33,8 @@ const userSchema = new mongoose.Schema(
       maxlength : 128,
       select: false,
       match : [
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;,
-        "password msut contain at least 8 values with uppercase, lowercase and number"
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/,
+        "password must contain at least 8 values with uppercase, lowercase and number"
       ]
     },
 
