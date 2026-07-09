@@ -1,7 +1,9 @@
 import Joi from "joi"
 import ROLES from "../constants/roles.js"
 
+
 export const registerSchema = Joi.object({
+
     fullName: Joi.string()
         .trim()
         .min(3)
@@ -10,8 +12,11 @@ export const registerSchema = Joi.object({
 
     email: Joi.string()
         .trim()
-        .lowercase()
         .email()
+        .required(),
+
+    phone: Joi.string()
+        .trim()
         .required(),
 
     password: Joi.string()
@@ -19,7 +24,7 @@ export const registerSchema = Joi.object({
         .required()
         .messages({
             "string.pattern.base":
-                "Password must contain at least 8 characters with uppercase, lowercase and a number."
+                "Password must contain at least 8 characters with uppercase, lowercase and number."
         }),
 
     confirmPassword: Joi.any()
@@ -33,27 +38,6 @@ export const registerSchema = Joi.object({
         .valid(ROLES.USER, ROLES.VENDOR)
         .required(),
 
-    phone: Joi.string()
-        .trim()
-        .required(),
-
-    businessName: Joi.when("role", {
-        is: "vendor",
-        then: Joi.string().trim().required(),
-        otherwise: Joi.optional()
-    }),
-
-    businessType: Joi.when("role", {
-        is: "vendor",
-        then: Joi.string().trim().required(),
-        otherwise: Joi.optional()
-    }),
-
-    address: Joi.when("role", {
-        is: "vendor",
-        then: Joi.string().trim().required(),
-        otherwise: Joi.optional()
-    })
 });
 
 export const loginSchema = Joi.object({
