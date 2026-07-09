@@ -19,12 +19,13 @@ import { generateToken } from "../utils/jwt.utils.js";
 import { ROLES } from "../constants/roles.js";
 
 
-const register = async (payload) => {
+export const register = async (payload) => {
 
         const {
             fullName,
             email,
             password,
+            confirmPassword,
             phone,
             role,
         } = payload;
@@ -35,6 +36,14 @@ const register = async (payload) => {
     if (existingUser) {
         throw new ConflictError("Email already exists.");
     };
+
+    if (!email) {
+        throw new UnauthorizedError("Email is Invalid")
+    };
+
+    if(password != confirmPassword) {
+        throw new ConflictError("Passwords do not match.");
+    }
 
     const hashedPassword = await hashPassword(password);
 
@@ -81,8 +90,12 @@ export const login = async ({ email, password }) => {
     const user = await findUserByEmail(email, true);
 
     if (!user) {
-        throw new UnauthorizedError("Invalid email or password.");
-    }
+        throw new UnauthorizedError("User Does Not Exist");
+    };
+
+    if(!email) {
+        throw new UnauthorizedError("Email is Invalid")
+    };
 
     const passwordMatch = await comparePassword(
         password,
@@ -90,7 +103,7 @@ export const login = async ({ email, password }) => {
     );
 
     if (!passwordMatch) {
-        throw new UnauthorizedError("Invalid email or password.");
+        throw new UnauthorizedError("Invalid password.");
     }
 
     const token = generateToken({
