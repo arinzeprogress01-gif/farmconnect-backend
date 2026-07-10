@@ -1,34 +1,3 @@
-import swaggerJsdoc from "swagger-jsdoc";
+import openapi from "../docs/openapi.js";
 
-const options = {
-    definition: {
-        openapi: "3.0.3",
-
-        info: {
-            title: "FarmConnect API",
-            version: "1.0.0",
-            description:
-                "Professional REST API documentation for the FarmConnect Backend.",
-        },
-
-        servers: [
-            {
-                url: "http://localhost:8080",
-                description: "Development Server",
-            },
-            {
-                url: "https://farmconnect-backend-1.onrender.com",
-                description: "Production Server",
-            },
-        ],
-    },
-
-    apis: [
-        "./src/routes/*.js",
-        "./src/controllers/*.js",
-    ],
-};
-
-const swaggerSpec = swaggerJsdoc(options);
-
-export default swaggerSpec;
+export default openapi;
