@@ -32,11 +32,17 @@ app.get("/", (req, res) => {
 });
 app.use("/api/v1/auth", authRoutes);
 
+
 app.use(
     "/api-docs",
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec)
 );
+
+app.get("/openapi.json", (req, res) => {
+    res.setHeader("Content-Type", "application/json");
+    res.send(swaggerSpec);
+});
 
 app.use(notFound);
 

@@ -2,12 +2,15 @@ import swaggerJsdoc from "swagger-jsdoc";
 
 const options = {
     definition: {
-        openapi: "3.0.0",
+        openapi: "3.0.3",
+
         info: {
             title: "FarmConnect API",
             version: "1.0.0",
-            description: "Backend API documentation for the FarmConnect project.",
+            description:
+                "Professional REST API documentation for the FarmConnect Backend.",
         },
+
         servers: [
             {
                 url: "http://localhost:8080",
@@ -20,7 +23,10 @@ const options = {
         ],
     },
 
-    apis: ["./src/routes/*.js"],
+    apis: [
+        "./src/routes/*.js",
+        "./src/controllers/*.js",
+    ],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
