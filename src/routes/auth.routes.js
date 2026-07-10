@@ -14,6 +14,20 @@ import {
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * /api/v1/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: true
+ *     responses:
+ *       201:
+ *         description: Registration successful
+ */
+
 router.post(
     "/register",
     validate(registerSchema),

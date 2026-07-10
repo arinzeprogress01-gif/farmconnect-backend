@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js";
 
 import authRoutes from "./routes/auth.routes.js";
 
@@ -29,6 +31,12 @@ app.get("/", (req, res) => {
     });
 });
 app.use("/api/v1/auth", authRoutes);
+
+app.use(
+    "/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec)
+);
 
 app.use(notFound);
 
