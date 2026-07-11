@@ -198,6 +198,60 @@ const authPaths = {
 
     },
 
+    "/api/v1/auth/forgot-password": {
+        post: {
+            tags: ["Authentication"],
+            summary: "Reset Password",
+            description:
+                "Allows a registered user to reset their password using their email address.",
+            operationId: "forgotPassword",
+
+            requestBody: {
+                required: true,
+                content: {
+                    "application/json": {
+                        schema: {
+                            type: "object",
+                            required: [
+                                "email",
+                                "newPassword",
+                                "confirmNewPassword",
+                            ],
+                            properties: {
+                                email: {
+                                    type: "string",
+                                    format: "email",
+                                    example: "higgs@gmail.com",
+                                },
+                                newPassword: {
+                                    type: "string",
+                                    example: "Password123",
+                                },
+                                confirmNewPassword: {
+                                    type: "string",
+                                    example: "Password123",
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+
+            responses: {
+                200: {
+                    description:
+                        "Password updated successfully.",
+                },
+                404: {
+                    $ref: "#/components/responses/NotFound",
+                },
+                400: {
+                    $ref: "#/components/responses/BadRequest",
+                },
+            },
+        },
+    },
+
 };
 
 export default authPaths;

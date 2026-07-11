@@ -3,8 +3,12 @@ import {
     findUserByEmail,
 } from "../repositories/user.repository.js";
 
+import { updatePassword } from "../repositories/auth.repository.js";
+
 
 import { UnauthorizedError } from "../errors/unauthorized-error.js";
+
+import { AppError } from "../errors/app.error.js";
 
 import { ConflictError } from "../errors/conflict-error.js";
 
@@ -122,6 +126,41 @@ export const login = async ({ email, password }) => {
         },
 
         token,
+
+    };
+
+};
+
+export const forgotPassword = async ({
+    email,
+    newPassword,
+}) => {
+
+    const user = await findUserByEmail(email);
+
+    if (!user) {
+
+        throw new AppError(
+            "User not found.",
+            404
+        );
+
+    }
+
+    const hashedPassword =
+        await hashPassword(newPassword);
+
+    await updatePassword(
+        user._id,
+        hashedPassword
+    );
+
+    return {
+
+        success: true,
+
+        message:
+            "Password updated successfully.",
 
     };
 
