@@ -1,9 +1,12 @@
 import express from "express";
 
+import authenticate from "../middleware/auth.middleware.js";
+
 import {
     registerUser,
     loginUser,
     forgotPassword,
+    logoutUser
 } from "../controllers/auth.controller.js";
 
 import { validate} from "../middleware/validate.middleware.js";
