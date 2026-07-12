@@ -62,3 +62,26 @@ export const forgotPassword = async (
     }
 
 };
+
+export const logoutUser = async (
+    req,
+    res,
+    next
+) => {
+
+    try {
+
+        const result =
+            await authService.logoutUser();
+
+        res.status(200).json(result);
+
+    }
+
+    catch (error) {
+
+        next(error);
+
+    }
+
+};

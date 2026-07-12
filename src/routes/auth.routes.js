@@ -40,4 +40,10 @@ router.post(
 
 );
 
+router.post(
+    "/logout",
+    authenticate,
+    logoutUser
+);
+
 export default router;

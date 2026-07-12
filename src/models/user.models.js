@@ -50,6 +50,14 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
+    profileCompleted: {
+
+      type: Boolean,
+
+      default: false,
+
+    },
+
     isVerified: {
       type: Boolean,
       default: false,
@@ -58,6 +66,25 @@ const userSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    permissions: {
+
+      admin: {
+
+        type: Boolean,
+
+        default: false,
+
+      },
+
+    },
+
+    isSuperAdmin: {
+
+      type: Boolean,
+
+      default: false,
+
     },
   },
   {

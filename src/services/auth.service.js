@@ -20,7 +20,7 @@ import { hashPassword, comparePassword } from "../utils/password.utils.js";
 
 import { generateToken } from "../utils/jwt.utils.js";
 
-import { ROLES } from "../constants/roles.js";
+
 
 
 export const register = async (payload) => {
@@ -113,16 +113,30 @@ export const login = async ({ email, password }) => {
     const token = generateToken({
         id: user._id,
         role: user.role,
+        permissions: user.permissions,
+        isSuperAdmin: user.isSuperAdmin,
     });
 
     return {
 
         user: {
+
             id: user._id,
+
             fullName: user.fullName,
+
             email: user.email,
+
             phone: user.phone,
+
             role: user.role,
+
+            profileCompleted: user.profileCompleted,
+
+            permissions: user.permissions,
+
+            isSuperAdmin: user.isSuperAdmin,
+
         },
 
         token,
@@ -161,6 +175,18 @@ export const forgotPassword = async ({
 
         message:
             "Password updated successfully.",
+
+    };
+
+};
+
+export const logoutUser = async () => {
+
+    return {
+
+        success: true,
+
+        message: "Logged out successfully.",
 
     };
 

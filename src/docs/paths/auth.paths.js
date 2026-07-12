@@ -251,6 +251,18 @@ const authPaths = {
             },
         },
     },
+    "/api/v1/auth/logout": {
+        post: {
+            201 : {
+                "success": true,
+                "message": "Logged out successfully."
+            },
+            summary: "Logout",
+            description:
+                "Logs out the current user and invalidates their JWT access token.",
+            operationId: "logoutUser",
+        },
+    },
 
 };
 

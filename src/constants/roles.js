@@ -1,6 +1,6 @@
 export const ROLES = {
     USER: "user",
-    VENDOR: "vendor"
+    VENDOR: "vendor",
 };
 
 export default ROLES;
