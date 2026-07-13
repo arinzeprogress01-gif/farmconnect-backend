@@ -13,6 +13,7 @@ import {
     findVendorByUserId,
     getVendorListings,
     updateListing,
+    getMarketListings
 } from "../repositories/listing.repository.js";
 
 import BadRequestError from "../errors/BadRequestError.js";

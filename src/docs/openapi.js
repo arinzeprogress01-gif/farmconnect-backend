@@ -4,6 +4,12 @@ import securitySchemes from "./components/security.js";
 import vendorProfileSchema from "./components/schemas/vendorProfile.schema.js";
 import vendorPaths from "./paths/vendor.paths.js";
 
+import listingSchemas
+    from "./components/schemas/listing.schema.js";
+
+import { listingPaths }
+    from "./paths/listing.paths.js";
+
 import authPaths from "./paths/auth.paths.js";
 
 import tags from "./tags.js";
@@ -66,7 +72,8 @@ This API is developed using:
     paths: {
 
         ...authPaths,
-        ...vendorPaths
+        ...vendorPaths,
+        ...listingPaths,
 
     },
 
@@ -74,7 +81,8 @@ This API is developed using:
 
         schemas: {
             ...schemas,
-            ...vendorProfileSchema
+            ...vendorProfileSchema,
+            ...listingSchemas
         },
 
         responses,
