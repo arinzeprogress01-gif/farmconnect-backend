@@ -1,6 +1,8 @@
 import schemas from "./components/schemas.js";
 import responses from "./components/responses.js";
 import securitySchemes from "./components/security.js";
+import vendorProfileSchema from "./components/schemas/vendorProfile.schema.js";
+import vendorPaths from "./paths/vendor.paths.js";
 
 import authPaths from "./paths/auth.paths.js";
 
@@ -64,12 +66,16 @@ This API is developed using:
     paths: {
 
         ...authPaths,
+        ...vendorPaths
 
     },
 
     components: {
 
-        schemas,
+        schemas: {
+            ...schemas,
+            ...vendorProfileSchema
+        },
 
         responses,
 
