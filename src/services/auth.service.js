@@ -7,18 +7,18 @@ import { updatePassword } from "../repositories/auth.repository.js";
 
 
 import { UnauthorizedError } from "../errors/unauthorized-error.js";
+import BadRequestError from "../errors/BadRequestError.js";
+
+
 
 import { AppError } from "../errors/app.error.js";
 
 import { ConflictError } from "../errors/conflict-error.js";
 
-import {
-    createVendorProfile,
-} from "../repositories/vendor-profile.repository.js";
-
 import { hashPassword, comparePassword } from "../utils/password.utils.js";
 
 import { generateToken } from "../utils/jwt.utils.js";
+
 
 
 
@@ -42,7 +42,7 @@ export const register = async (payload) => {
     };
 
     if (!email) {
-        throw new UnauthorizedError("Email is Invalid")
+        throw new BadRequestError("Email is required");
     };
 
     if(password != confirmPassword) {
@@ -98,7 +98,7 @@ export const login = async ({ email, password }) => {
     };
 
     if(!email) {
-        throw new UnauthorizedError("Email is Invalid")
+        throw new BadRequestError("Email is required");
     };
 
     const passwordMatch = await comparePassword(
@@ -179,6 +179,7 @@ export const forgotPassword = async ({
     };
 
 };
+
 
 export const logoutUser = async () => {
 

@@ -21,13 +21,32 @@ const vendorProfileSchema = new mongoose.Schema(
       trim: true,
     },
 
+    description: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    email: {
+      type: String,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+
     phone: {
       type: String,
       required: true,
       trim: true,
     },
 
-    address: {
+    permanentAddress: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    currentLocation: {
       type: String,
       required: true,
       trim: true,
@@ -37,12 +56,23 @@ const vendorProfileSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    operatingHours: {
+      type: String,
+      default: "",
+    },
+
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-const VendorProfile = mongoose.model("VendorProfile", vendorProfileSchema);
-
-export default VendorProfile;
+export default mongoose.model(
+  "VendorProfile",
+  vendorProfileSchema
+);

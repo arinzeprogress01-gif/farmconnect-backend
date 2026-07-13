@@ -6,6 +6,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
 
 import authRoutes from "./routes/auth.routes.js";
+import vendorRoutes from "./routes/vendor.routes.js";
 
 import notFound from "./middleware/not-found.middleware.js";
 import errorHandler from "./middleware/error.middleware.js";
@@ -31,7 +32,7 @@ app.get("/", (req, res) => {
     });
 });
 app.use("/api/v1/auth", authRoutes);
-
+app.use("/api/vendors", vendorRoutes);
 
 app.use(
     "/api-docs",
