@@ -17,6 +17,8 @@ const vendorProfileSchema = {
             "permanentAddress",
 
             "currentLocation",
+            
+            "operatingHours",
 
         ],
 
