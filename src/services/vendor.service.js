@@ -50,7 +50,7 @@ export const createVendorProfile = async (
 
     // 4. Prevent duplicate profiles
     const existingVendor =
-        await findVendorByUserId(userId);
+        await findVendorByUserId(userId); 
 
     if (existingVendor) {
         throw new ConflictError(

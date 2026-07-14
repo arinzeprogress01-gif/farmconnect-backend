@@ -4,3 +4,4 @@ uploads/*
 logs
 coverage
 .DS_Store
+src/config/firebase/serviceAccount.json

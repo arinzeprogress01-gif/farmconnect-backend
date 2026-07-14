@@ -5,8 +5,17 @@ import authenticate from "../middleware/auth.middleware.js";
 import {
     registerUser,
     loginUser,
-    forgotPassword,
     logoutUser
+} from "../controllers/auth.controller.js";
+
+import {
+
+    forgotPasswordUser,
+
+    verifyUserOtp,
+
+    resetUserPassword,
+
 } from "../controllers/auth.controller.js";
 
 import { validate} from "../middleware/validate.middleware.js";
@@ -33,13 +42,28 @@ router.post(
     loginUser
 );
 
+
 router.post(
 
     "/forgot-password",
 
-    validate(forgotPasswordSchema),
+    forgotPasswordUser
 
-    forgotPassword
+);
+
+router.post(
+
+    "/verify-otp",
+
+    verifyUserOtp
+
+);
+
+router.post(
+
+    "/reset-password",
+
+    resetUserPassword
 
 );
 

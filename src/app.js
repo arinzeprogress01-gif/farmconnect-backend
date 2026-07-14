@@ -7,6 +7,7 @@ import swaggerSpec from "./config/swagger.js";
 
 import authRoutes from "./routes/auth.routes.js";
 import vendorRoutes from "./routes/vendor.routes.js";
+import userRoutes from "./routes/user.routes.js";
 import listingRoutes from "./routes/listing.routes.js";
 
 import notFound from "./middleware/not-found.middleware.js";
@@ -34,8 +35,8 @@ app.get("/", (req, res) => {
 });
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/vendors", vendorRoutes);
-app.use("/api/listings",
-listingRoutes);
+app.use("/api/listings",listingRoutes);
+app.use("/api/users", userRoutes);
 
 app.use(
     "/api-docs",

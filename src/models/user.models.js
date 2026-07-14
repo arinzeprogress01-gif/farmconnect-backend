@@ -78,6 +78,89 @@ const userSchema = new mongoose.Schema(
       },
 
     },
+    passwordReset: {
+
+    otpHash: {
+
+        type: String,
+
+        default: null,
+
+    },
+
+    expiresAt: {
+
+        type: Date,
+
+        default: null,
+
+    },
+
+    attempts: {
+
+        type: Number,
+
+        default: 0,
+
+    },
+
+    verified: {
+
+        type: Boolean,
+
+        default: false,
+
+    },
+
+    createdAt: {
+
+        type: Date,
+
+        default: null,
+
+    },
+
+},
+
+    devices: [
+
+      {
+
+        token: {
+
+          type: String,
+
+          required: true,
+
+        },
+
+        platform: {
+
+          type: String,
+
+          default: "web",
+
+        },
+
+        browser: {
+
+          type: String,
+
+          default: "Unknown",
+
+        },
+
+        lastSeen: {
+
+          type: Date,
+
+          default: Date.now,
+
+        },
+
+      },
+
+    ],
 
     isSuperAdmin: {
 

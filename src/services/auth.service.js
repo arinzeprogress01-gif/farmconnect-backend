@@ -1,14 +1,27 @@
+import bcrypt from "bcrypt";
+
 import {
     createUser,
     findUserByEmail,
 } from "../repositories/user.repository.js";
 
-import { updatePassword } from "../repositories/auth.repository.js";
+import {
+
+    updatePasswordReset,
+
+    updatePassword,
+
+    incrementPasswordResetAttempts,
+
+    markPasswordResetVerified,
+
+    clearPasswordReset,
+
+} from "../repositories/auth.repository.js";
 
 
 import { UnauthorizedError } from "../errors/unauthorized-error.js";
 import BadRequestError from "../errors/BadRequestError.js";
-
 
 
 import { AppError } from "../errors/app.error.js";
@@ -20,6 +33,29 @@ import { hashPassword, comparePassword } from "../utils/password.utils.js";
 import { generateToken } from "../utils/jwt.utils.js";
 
 
+//-------------------------------------------------------
+
+
+
+import generateOTP from "../utils/generateOtp.js";
+
+import forgotPasswordSchema from "../validators/forgotPassword.validator.js";
+
+import verifyOtpSchema from "../validators/verifyOtp.validator.js";
+
+import resetPasswordSchema from "../validators/resetPassword.validator.js";
+
+import {
+
+    sendPushNotification,
+
+} from "./notifications.service.js";
+
+import {
+
+    sendResetEmail,
+
+} from "./email.service.js";
 
 
 
@@ -145,36 +181,376 @@ export const login = async ({ email, password }) => {
 
 };
 
-export const forgotPassword = async ({
-    email,
-    newPassword,
-}) => {
+export const forgotPassword = async (
 
-    const user = await findUserByEmail(email);
+    body
+
+) => {
+
+    const { error, value } =
+
+        forgotPasswordSchema.validate(body);
+
+    if (error) {
+
+        throw new BadRequestError(
+
+            error.details[0].message
+
+        );
+
+    }
+
+    const { email } = value;
+
+    const user = await findUserByEmail(
+
+        email,
+
+        true
+
+    );
+
+    /*
+        Do not reveal whether
+        the email exists.
+    */
 
     if (!user) {
 
-        throw new AppError(
-            "User not found.",
-            404
+        return {
+
+            message:
+                "If an account exists, an OTP has been sent.",
+
+        };
+
+    }
+
+    const otp = generateOTP();
+
+    const otpHash = await bcrypt.hash(
+
+        otp,
+
+        10
+
+    );
+
+    await updatePasswordReset(
+
+        user,
+
+        {
+
+            otpHash,
+
+            expiresAt:
+
+                new Date(
+
+                    Date.now() +
+
+                    5 * 60 * 1000
+
+                ),
+
+            attempts: 0,
+
+            verified: false,
+
+            createdAt: new Date(),
+
+        }
+
+    );
+
+    if (
+
+        user.devices.length > 0
+
+    ) {
+
+        await sendPushNotification({
+
+            tokens:
+
+                user.devices.map(
+
+                    d => d.token
+
+                ),
+
+            title:
+
+                "FarmConnect",
+
+            body:
+
+                `Your password reset code is ${otp}. It expires in 5 minutes.`,
+
+            data: {
+
+                type:
+
+                    "PASSWORD_RESET",
+
+                email:
+
+                    user.email,
+
+            },
+
+        });
+
+    }
+
+    /*
+        Future Email Support
+    */
+
+    await sendResetEmail(
+
+        user.email,
+
+        otp
+
+    );
+
+    return {
+
+        message:
+            "If an account exists, an OTP has been sent.",
+
+    };
+
+};
+
+export const verifyOtp = async (
+
+    body
+
+) => {
+
+    const { error, value } =
+
+        verifyOtpSchema.validate(body);
+
+    if (error) {
+
+        throw new BadRequestError(
+
+            error.details[0].message
+
+        );
+
+    }
+
+    const {
+
+        email,
+
+        otp,
+
+    } = value;
+
+    const user =
+
+        await findUserByEmail(
+
+            email,
+
+            true
+
+        );
+
+    if (!user) {
+
+        throw new UnauthorizedError(
+
+            "Invalid OTP."
+
+        );
+
+    }
+
+    if (
+
+        !user.passwordReset.otpHash
+
+    ) {
+
+        throw new UnauthorizedError(
+
+            "OTP has not been generated."
+
+        );
+
+    }
+
+    if (
+
+        user.passwordReset.expiresAt <
+
+        new Date()
+
+    ) {
+
+        throw new UnauthorizedError(
+
+            "OTP has expired."
+
+        );
+
+    }
+
+    if (
+
+        user.passwordReset.attempts >= 5
+
+    ) {
+
+        throw new UnauthorizedError(
+
+            "Too many attempts. Request another OTP."
+
+        );
+
+    }
+
+    const valid =
+
+        await bcrypt.compare(
+
+            otp,
+
+            user.passwordReset.otpHash
+
+        );
+
+    if (!valid) {
+
+        await incrementPasswordResetAttempts(
+
+            user
+
+        );
+
+        throw new UnauthorizedError(
+
+            "Invalid OTP."
+
+);
+
+    }
+
+        await markPasswordResetVerified(
+
+            user
+
+        );
+
+    return {
+
+        message:
+
+            "OTP verified successfully.",
+
+    };
+
+};
+
+export const resetPassword = async (
+
+    body
+
+) => {
+
+    const { error, value } =
+
+        resetPasswordSchema.validate(body);
+
+    if (error) {
+
+        throw new BadRequestError(
+
+            error.details[0].message
+
+        );
+
+    }
+
+    const {
+
+        email,
+
+        newPassword,
+
+    } = value;
+
+    const user =
+
+        await findUserByEmail(
+
+            email,
+
+            true
+
+        );
+
+    if (!user) {
+
+        throw new UnauthorizedError(
+
+            "Invalid request."
+
+        );
+
+    }
+
+    if (
+
+        !user.passwordReset.verified
+
+    ) {
+
+        throw new UnauthorizedError(
+
+            "OTP verification is required."
+
         );
 
     }
 
     const hashedPassword =
-        await hashPassword(newPassword);
+
+        await bcrypt.hash(
+
+            newPassword,
+
+            10
+
+        );
 
     await updatePassword(
-        user._id,
+
+        user,
+
         hashedPassword
+
+    );
+
+    await clearPasswordReset(
+
+        user
+
     );
 
     return {
 
-        success: true,
-
         message:
-            "Password updated successfully.",
+
+            "Password reset successfully.",
 
     };
 

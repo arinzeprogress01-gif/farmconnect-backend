@@ -4,13 +4,21 @@ import securitySchemes from "./components/security.js";
 import vendorProfileSchema from "./components/schemas/vendorProfile.schema.js";
 import vendorPaths from "./paths/vendor.paths.js";
 
-import listingSchemas
-    from "./components/schemas/listing.schema.js";
+import appUserProfilePaths from "./paths/appUserProfile.paths.js";
 
-import { listingPaths }
-    from "./paths/listing.paths.js";
+import appUserProfileSchemas from "./components/schemas/appUserProfile.schema.js";
+
+import appUserProfileResponseSchemas from "./components/schemas/appUserProfileResponse.schema.js";
+
+import listingSchemas from "./components/schemas/listing.schema.js";
+
+import { listingPaths } from "./paths/listing.paths.js";
 
 import authPaths from "./paths/auth.paths.js";
+
+import deviceSchemas from "./components/schemas/device.schema.js";
+
+import devicePaths from "./paths/device.paths.js";
 
 import tags from "./tags.js";
 
@@ -74,6 +82,8 @@ This API is developed using:
         ...authPaths,
         ...vendorPaths,
         ...listingPaths,
+        ...appUserProfilePaths,
+        ...devicePaths,
 
     },
 
@@ -82,7 +92,10 @@ This API is developed using:
         schemas: {
             ...schemas,
             ...vendorProfileSchema,
-            ...listingSchemas
+            ...listingSchemas,
+            ...appUserProfileSchemas,
+            ...appUserProfileResponseSchemas,
+            ...deviceSchemas,
         },
 
         responses,
