@@ -32,6 +32,16 @@ const listingSchema = Joi.object({
                 "Please select a valid food category.",
 
         }),
+    
+    price: Joi.when("isFree", {
+
+        is: true,
+
+        then: Joi.number().valid(0),
+
+        otherwise: Joi.number().min(1).required(),
+
+    }),
 
     description: Joi.string()
 

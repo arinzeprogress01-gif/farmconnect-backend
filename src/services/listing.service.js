@@ -106,6 +106,14 @@ export const createNewListing = async (
 
             value.pickupLocation;
 
+    };
+
+    let price = value.price;
+
+    if (value.isFree) {
+
+        price = 0;
+
     }
 
 
@@ -145,6 +153,10 @@ export const createNewListing = async (
             isHealthy: value.isHealthy,
 
             expiresAt,
+
+            isFree: value.isFree,
+
+            price,
 
         });
 
