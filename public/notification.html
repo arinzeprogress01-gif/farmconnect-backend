@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FarmConnect Notifications</title>
+
+    <link rel="stylesheet" href="./notification.css">
+
+</head>
+
+<body>
+
+    <div Class="card">
+
+        <h1>🌱 FarmConnect</h1>
+
+        <p>
+
+            Enable Push Notifications
+
+        </p>
+
+        <button id="enableBtn">
+
+            Enable Notifications
+
+        </button>
+
+        <div Class="status">
+
+            <p>
+
+                Status
+
+            </p>
+
+            <span id="status">
+
+                Waiting...
+
+            </span>
+
+        </div>
+
+        <div Class="tokenBox">
+
+            <label>
+
+                FCM Token
+
+            </label>
+
+            <textarea id="token" readonly></textarea>
+
+        </div>
+
+        <div Class="jwtBox">
+
+            <label>
+
+                JWT Token
+
+            </label>
+
+            <textarea id="jwt" placeholder="Paste JWT here"></textarea>
+
+        </div>
+
+        <button id="registerBtn">
+
+            Register Device
+
+        </button>
+
+    </div>
+
+    <script type="module" src="./notification.js"></script>
+
+</body>
+
+</html>

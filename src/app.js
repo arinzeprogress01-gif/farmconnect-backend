@@ -5,14 +5,22 @@ import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 import swaggerSpec from "./config/swagger.js";
 
+import path from "path";
+import { fileURLToPath } from "url";
+
 import authRoutes from "./routes/auth.routes.js";
 import vendorRoutes from "./routes/vendor.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import listingRoutes from "./routes/listing.routes.js";
 
+import reservationRoutes from "./routes/reservation.routes.js";
+
 import notFound from "./middleware/not-found.middleware.js";
 import errorHandler from "./middleware/error.middleware.js";
 
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
 const app = express();
 
 app.use(helmet());
@@ -33,10 +41,18 @@ app.get("/", (req, res) => {
         message: "FarmConnect API Running...",
     });
 });
+
+app.use(
+    express.static(
+        path.join(__dirname, "../public")
+    )
+);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/vendors", vendorRoutes);
 app.use("/api/listings",listingRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/reservations",
+reservationRoutes);
 
 app.use(
     "/api-docs",

@@ -26,6 +26,13 @@ export const findListingById = async (
 
 };
 
+export const findListingByObjectId = async (
+    id
+) => {
+
+    return await Listing.findById(id);
+
+};
 export const findVendorByUserId = async (
     userId
 ) => {
