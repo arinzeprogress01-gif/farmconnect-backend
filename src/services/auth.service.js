@@ -1,5 +1,7 @@
 import bcrypt from "bcrypt";
 
+import sendNotification  from "../utils/sendNotification.js";
+
 import {
     createUser,
     findUserByEmail,
@@ -93,6 +95,27 @@ export const register = async (payload) => {
         password: hashedPassword,
         phone,
         role,
+    });
+
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Welcome to FarmConnect",
+
+        message:
+            "Welcome! Your account has been created successfully.",
+
+        type: "system",
+
+        priority: "medium",
+
+        data: {
+
+            action: "OPEN_HOME",
+
+        },
+
     });
 
     const token = generateToken({
@@ -317,6 +340,27 @@ export const forgotPassword = async (
 
     );
 
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Password Reset Requested",
+
+        message:
+            "A password reset request was initiated for your account.",
+
+        type: "security",
+
+        priority: "high",
+
+        data: {
+
+            action: "OPEN_PROFILE",
+
+        },
+
+    });
+
     return {
 
         message:
@@ -450,6 +494,27 @@ export const verifyOtp = async (
 
         );
 
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "OTP Verified",
+
+        message:
+            "Your password reset OTP has been verified successfully.",
+
+        type: "security",
+
+        priority: "medium",
+
+        data: {
+
+            action: "OPEN_PROFILE",
+
+        },
+
+    });
+
     return {
 
         message:
@@ -545,6 +610,27 @@ export const resetPassword = async (
         user
 
     );
+
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Password Changed",
+
+        message:
+            "Your password has been changed successfully.",
+
+        type: "security",
+
+        priority: "high",
+
+        data: {
+
+            action: "OPEN_PROFILE",
+
+        },
+
+    });
 
     return {
 

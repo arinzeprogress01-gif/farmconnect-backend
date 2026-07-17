@@ -2,6 +2,8 @@ import vendorProfileSchema from "../validators/vendor.validator.js";
 
 import User from "../models/user.models.js";
 
+import sendNotification  from "../utils/sendNotification.js";
+
 import {
     createVendor,
     findVendorByUserId,
@@ -16,6 +18,7 @@ import {
 import BadRequestError from "../errors/BadRequestError.js";
 import { ConflictError} from "../errors/conflict-error.js";
 import ForbiddenError from "../errors/ForbiddenError.js";
+import NotFoundError from "../errors/NotFoundError.js";
 import { ROLES } from "../constants/roles.js";
 
 export const createVendorProfile = async (
@@ -72,6 +75,29 @@ export const createVendorProfile = async (
 
     await user.save();
 
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Vendor Profile Created",
+
+        message:
+            "Congratulations! Your vendor profile has been created successfully. You can now start publishing food listings.",
+
+        type: "vendor",
+
+        priority: "medium",
+
+        data: {
+
+            vendorId: vendor._id,
+
+            action: "OPEN_VENDOR_PROFILE",
+
+        },
+
+    });
+
     return vendor;
 };
 
@@ -122,6 +148,29 @@ export const updateVendor = async (
 
         );
 
+    await sendNotification({
+
+        receiver: userId,
+
+        title: "Vendor Profile Updated",
+
+        message:
+            "Your vendor profile has been updated successfully.",
+
+        type: "vendor",
+
+        priority: "low",
+
+        data: {
+
+            vendorId: updatedVendor._id,
+
+            action: "OPEN_VENDOR_PROFILE",
+
+        },
+
+    });
+
     return updatedVendor;
 
 };
@@ -142,6 +191,27 @@ export const deleteVendor = async (
     }
 
     await deleteVendorProfile(userId);
+
+    await sendNotification({
+
+        receiver: userId,
+
+        title: "Vendor Profile Deleted",
+
+        message:
+            "Your vendor profile has been removed successfully.",
+
+        type: "vendor",
+
+        priority: "high",
+
+        data: {
+
+            action: "OPEN_HOME",
+
+        },
+
+    });
 
     return;
 

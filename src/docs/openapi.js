@@ -20,6 +20,12 @@ import deviceSchemas from "./components/schemas/device.schema.js";
 
 import devicePaths from "./paths/device.paths.js";
 
+import reservationSchemas from "./components/schemas/reservation.schema.js";
+import notificationSchemas from "./components/schemas/notification.schema.js";
+
+import reservationPaths from "./paths/reservation.paths.js";
+import notificationPaths from "./paths/notification.paths.js";
+
 import tags from "./tags.js";
 
 const openapi = {
@@ -84,7 +90,8 @@ This API is developed using:
         ...listingPaths,
         ...appUserProfilePaths,
         ...devicePaths,
-
+        ...reservationPaths,
+        ...notificationPaths,
     },
 
     components: {
@@ -96,6 +103,8 @@ This API is developed using:
             ...appUserProfileSchemas,
             ...appUserProfileResponseSchemas,
             ...deviceSchemas,
+            ...reservationSchemas,
+            ...notificationSchemas,
         },
 
         responses,

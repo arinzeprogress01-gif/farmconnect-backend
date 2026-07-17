@@ -1,5 +1,7 @@
 import listingSchema from "../validators/listing.validator.js";
 
+import  sendNotification  from "../utils/sendNotification.js";
+
 import User from "../models/user.models.js";
 
 import VendorProfile from "../models/vendor.model.js";
@@ -159,6 +161,29 @@ export const createNewListing = async (
             price,
 
         });
+    
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Listing Published",
+
+        message:
+            `${listing.foodName} has been published successfully.`,
+
+        type: "listing",
+
+        priority: "medium",
+
+        data: {
+
+            listingId: listing.listingId,
+
+            action: "OPEN_MY_LISTINGS",
+
+        },
+
+    });
 
     return listing;
 
@@ -261,13 +286,38 @@ export const updateMyListing = async (
 
     }
 
-    return await updateListing(
+    const updatedListing =
+        await updateListing(
+            listingId,
+            updateData
+        );
 
-        listingId,
+    await sendNotification({
 
-        updateData
+        receiver: userId,
 
-    );
+        title: "Listing Updated",
+
+        message:
+            `${updatedListing.foodName} has been updated.`,
+
+        type: "listing",
+
+        priority: "low",
+
+        data: {
+
+            listingId:
+                updatedListing.listingId,
+
+            action:
+                "OPEN_MY_LISTINGS",
+
+        },
+
+    });
+
+    return updatedListing;
 
 };
 
@@ -329,18 +379,43 @@ export const deleteMyListing = async (
 
     }
 
-    return await updateListing(
+    const cancelledListing =
+        await updateListing(
+            listingId,
+            {
 
-        listingId,
+                isActive: false,
 
-        {
+                status: "cancelled",
 
-            isActive: false,
+            }
+        );
 
-            status: "cancelled",
+    await sendNotification({
 
-        }
+        receiver: userId,
 
-    );
+        title: "Listing Cancelled",
+
+        message:
+            `${cancelledListing.foodName} has been removed from the marketplace.`,
+
+        type: "listing",
+
+        priority: "high",
+
+        data: {
+
+            listingId:
+                cancelledListing.listingId,
+
+            action:
+                "OPEN_MY_LISTINGS",
+
+        },
+
+    });
+
+    return cancelledListing;
 
 };

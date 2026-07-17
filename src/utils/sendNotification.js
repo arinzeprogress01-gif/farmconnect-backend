@@ -4,7 +4,7 @@ import {
 
 import {
     sendPushNotification,
-} from "../config/pushNotification.js";
+} from "../services/notifications.service.js";
 
 const sendNotification = async ({
 

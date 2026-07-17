@@ -1,5 +1,6 @@
 import Reservation from "../models/reservation.model.js";
 import User from "../models/user.models.js";
+import  sendNotification  from "../utils/sendNotification.js";
 
 import reservationSchema from "../validators/reservation.validator.js";
 
@@ -151,6 +152,88 @@ export const reserveListing = async (
 
         Email Notification
     */
+    
+    await sendNotification({
+
+    receiver: listing.vendorId,
+
+    title: "New Reservation",
+
+    message:
+        `${user.fullName} reserved ${quantityRequested} portion(s) of ${listing.foodName}.`,
+
+    type: "reservation",
+
+    priority: "high",
+
+    data: {
+
+        reservationId:
+            reservation.reservationId,
+
+        listingId:
+            listing.listingId,
+
+        action:
+            "OPEN_VENDOR_RESERVATIONS",
+
+    },
+
+});
+
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Reservation Confirmed",
+
+        message:
+            `Your reservation for ${listing.foodName} was successful. Pickup Code: ${reservation.pickupCode}.`,
+
+        type: "reservation",
+
+        priority: "high",
+
+        data: {
+
+            reservationId:
+                reservation.reservationId,
+
+            action:
+                "OPEN_MY_RESERVATIONS",
+
+        },
+
+    });
+
+    if (listing.quantity === 0) {
+
+        await sendNotification({
+
+            receiver: listing.vendorId,
+
+            title: "Listing Completed",
+
+            message:
+                `${listing.foodName} has been completely reserved.`,
+
+            type: "listing",
+
+            priority: "medium",
+
+            data: {
+
+                listingId:
+                    listing.listingId,
+
+                action:
+                    "OPEN_MY_LISTINGS",
+
+            },
+
+        });
+
+    }
 
     return reservation;
 
@@ -292,6 +375,33 @@ export const cancelReservation = async (
 
     */
 
+    await sendNotification({
+
+        receiver: reservation.user,
+
+        title: "Reservation Cancelled",
+
+        message:
+            `Your reservation for ${reservation.foodName} was cancelled.
+
+Reason: ${cancellationReason}`,
+
+        type: "reservation",
+
+        priority: "high",
+
+        data: {
+
+            reservationId:
+                reservation.reservationId,
+
+            action:
+                "OPEN_MY_RESERVATIONS",
+
+        },
+
+    });
+
     return reservation;
 
 };
@@ -381,6 +491,30 @@ export const completeReservation = async (
         Email Notification
 
     */
+    await sendNotification({
+
+        receiver: reservation.user,
+
+        title: "Reservation Completed",
+
+        message:
+            `Your reservation for ${reservation.foodName} has been marked as completed.`,
+
+        type: "reservation",
+
+        priority: "medium",
+
+        data: {
+
+            reservationId:
+                reservation.reservationId,
+
+            action:
+                "OPEN_MY_RESERVATIONS",
+
+        },
+
+    });
 
     return reservation;
 
