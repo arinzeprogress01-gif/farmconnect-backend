@@ -38,9 +38,29 @@ const notificationSchema = new mongoose.Schema({
 
         enum: [
 
+            "listing",
+
+            "listing_created",
+
+            "listing_updated",
+
+            "listing_cancelled",
+
+            "listing_completed",
+
+            "listing_expired",
+
             "reservation",
 
-            "listing",
+            "reservation_created",
+
+            "reservation_completed",
+
+            "reservation_cancelled",
+
+            "vendor_profile_created",
+
+            "password_reset",
 
             "system",
 

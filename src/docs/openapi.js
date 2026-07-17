@@ -26,6 +26,9 @@ import notificationSchemas from "./components/schemas/notification.schema.js";
 import reservationPaths from "./paths/reservation.paths.js";
 import notificationPaths from "./paths/notification.paths.js";
 
+import analyticsSchemas from "./components/schemas/analytics.schema.js";
+import analyticsPaths from "./paths/analytics.paths.js";
+
 import tags from "./tags.js";
 
 const openapi = {
@@ -92,6 +95,7 @@ This API is developed using:
         ...devicePaths,
         ...reservationPaths,
         ...notificationPaths,
+        ...analyticsPaths,
     },
 
     components: {
@@ -105,6 +109,7 @@ This API is developed using:
             ...deviceSchemas,
             ...reservationSchemas,
             ...notificationSchemas,
+            ...analyticsSchemas,
         },
 
         responses,

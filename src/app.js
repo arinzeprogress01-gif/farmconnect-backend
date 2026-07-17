@@ -16,9 +16,15 @@ import listingRoutes from "./routes/listing.routes.js";
 import reservationRoutes from "./routes/reservation.routes.js";
 
 import notificationRoutes from "./routes/notification.routes.js";
+import analyticsRoutes from "./routes/analytics.routes.js";
 
 import notFound from "./middleware/not-found.middleware.js";
 import errorHandler from "./middleware/error.middleware.js";
+
+import {
+    startListingExpirationJob,
+} from "./jobs/listingExpiration.job.js";
+
 
 const __filename = fileURLToPath(import.meta.url);
 
@@ -62,6 +68,10 @@ app.use(
     notificationRoutes
 
 );
+app.use(
+    "/api/analytics",
+    analyticsRoutes
+);
 
 app.use(
     "/api-docs",
@@ -77,5 +87,7 @@ app.get("/openapi.json", (req, res) => {
 app.use(notFound);
 
 app.use(errorHandler);
+
+startListingExpirationJob();
 
 export default app;
