@@ -15,6 +15,8 @@ import listingRoutes from "./routes/listing.routes.js";
 
 import reservationRoutes from "./routes/reservation.routes.js";
 
+import notificationRoutes from "./routes/notification.routes.js";
+
 import notFound from "./middleware/not-found.middleware.js";
 import errorHandler from "./middleware/error.middleware.js";
 
@@ -53,6 +55,13 @@ app.use("/api/listings",listingRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/reservations",
 reservationRoutes);
+app.use(
+
+    "/api/notifications",
+
+    notificationRoutes
+
+);
 
 app.use(
     "/api-docs",
