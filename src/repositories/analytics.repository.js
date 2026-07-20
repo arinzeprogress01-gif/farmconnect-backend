@@ -172,3 +172,15 @@ export const getVendorAnalytics = async (vendorId) => {
     };
 
 };
+
+export const getUserDashboardAnalytics = async (userId) => {
+
+    const reservations = await Reservation.find({
+
+        user: userId,
+
+    });
+
+    return reservations;
+
+};

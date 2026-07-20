@@ -87,7 +87,6 @@ router.get(
 );
 
 router.patch(
-
     "/:reservationId/complete",
 
     authenticate,
