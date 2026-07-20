@@ -33,6 +33,10 @@ const listingSchema = Joi.object({
 
         }),
     
+    isFree: Joi.boolean()
+
+        .default(false),
+    
     price: Joi.when("isFree", {
 
         is: true,
