@@ -10,6 +10,7 @@ import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/auth.routes.js";
 import vendorRoutes from "./routes/vendor.routes.js";
+import appUserRoutes from "./routes/appUser.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import listingRoutes from "./routes/listing.routes.js";
 
@@ -57,6 +58,13 @@ app.use(
 );
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/vendors", vendorRoutes);
+app.use(
+
+    "/api/user",
+
+    appUserRoutes
+
+);
 app.use("/api/listings",listingRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/reservations",
