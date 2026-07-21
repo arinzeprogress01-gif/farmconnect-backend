@@ -201,56 +201,263 @@ const authPaths = {
     "/api/v1/auth/forgot-password": {
         post: {
             tags: ["Authentication"],
-            summary: "Reset Password",
+            summary: "Request Password Reset OTP",
             description:
-                "Allows a registered user to reset their password using their email address.",
+                "Generates a One-Time Password (OTP) and sends it to the user's registered email address and registered devices.",
+
             operationId: "forgotPassword",
 
             requestBody: {
                 required: true,
+
                 content: {
                     "application/json": {
+
                         schema: {
                             type: "object",
+
                             required: [
                                 "email",
-                                "newPassword",
-                                "confirmNewPassword",
                             ],
+
                             properties: {
+
                                 email: {
                                     type: "string",
                                     format: "email",
                                     example: "higgs@gmail.com",
                                 },
-                                newPassword: {
-                                    type: "string",
-                                    example: "Password123",
-                                },
-                                confirmNewPassword: {
-                                    type: "string",
-                                    example: "Password123",
-                                },
+
                             },
+
                         },
+
                     },
+
                 },
+
             },
 
             responses: {
+
                 200: {
+
                     description:
-                        "Password updated successfully.",
+                        "If an account exists, an OTP has been sent.",
+
                 },
-                404: {
-                    $ref: "#/components/responses/NotFound",
-                },
+
                 400: {
-                    $ref: "#/components/responses/BadRequest",
+
+                    $ref:
+                        "#/components/responses/BadRequest",
+
                 },
+
             },
+
         },
+
     },
+
+    "/api/v1/auth/verify-otp": {
+
+        post: {
+
+            tags: ["Authentication"],
+
+            summary: "Verify Password Reset OTP",
+
+            description:
+                "Verifies the OTP sent to the user's email before allowing password reset.",
+
+            operationId: "verifyOtp",
+
+            requestBody: {
+
+                required: true,
+
+                content: {
+
+                    "application/json": {
+
+                        schema: {
+
+                            type: "object",
+
+                            required: [
+
+                                "email",
+
+                                "otp",
+
+                            ],
+
+                            properties: {
+
+                                email: {
+
+                                    type: "string",
+
+                                    format: "email",
+
+                                    example:
+                                        "higgs@gmail.com",
+
+                                },
+
+                                otp: {
+
+                                    type: "string",
+
+                                    example: "123456",
+
+                                },
+
+                            },
+
+                        },
+
+                    },
+
+                },
+
+            },
+
+            responses: {
+
+                200: {
+
+                    description:
+                        "OTP verified successfully.",
+
+                },
+
+                400: {
+
+                    $ref:
+                        "#/components/responses/BadRequest",
+
+                },
+
+                401: {
+
+                    $ref:
+                        "#/components/responses/Unauthorized",
+
+                },
+
+            },
+
+        },
+
+    },
+
+    "/api/v1/auth/reset-password": {
+
+        post: {
+
+            tags: ["Authentication"],
+
+            summary: "Reset Password",
+
+            description:
+                "Resets the user's password after successful OTP verification.",
+
+            operationId: "resetPassword",
+
+            requestBody: {
+
+                required: true,
+
+                content: {
+
+                    "application/json": {
+
+                        schema: {
+
+                            type: "object",
+
+                            required: [
+
+                                "email",
+
+                                "newPassword",
+
+                                "confirmPassword",
+
+                            ],
+
+                            properties: {
+
+                                email: {
+
+                                    type: "string",
+
+                                    format: "email",
+
+                                    example:
+                                        "higgs@gmail.com",
+
+                                },
+
+                                newPassword: {
+
+                                    type: "string",
+
+                                    example:
+                                        "Password123",
+
+                                },
+
+                                confirmPassword: {
+
+                                    type: "string",
+
+                                    example:
+                                        "Password123",
+
+                                },
+
+                            },
+
+                        },
+
+                    },
+
+                },
+
+            },
+
+            responses: {
+
+                200: {
+
+                    description:
+                        "Password reset successfully.",
+
+                },
+
+                400: {
+
+                    $ref:
+                        "#/components/responses/BadRequest",
+
+                },
+
+                401: {
+
+                    $ref:
+                        "#/components/responses/Unauthorized",
+
+                },
+
+            },
+
+        },
+
+    },
+    
     "/api/v1/auth/logout": {
         post: {
             201 : {

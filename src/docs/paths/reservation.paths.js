@@ -466,6 +466,90 @@ const reservationPaths = {
 
     },
 
+    "/api/v1/reservations/{reservationId}/user-cancel": {
+
+        patch: {
+
+            tags: ["Reservations"],
+
+            summary: "Cancel Reservation (User)",
+
+            description:
+                "Allows an app user to cancel their own reservation before it is completed.",
+
+            operationId: "userCancelReservation",
+
+            security: [
+
+                {
+
+                    bearerAuth: [],
+
+                },
+
+            ],
+
+            parameters: [
+
+                {
+
+                    in: "path",
+
+                    name: "reservationId",
+
+                    required: true,
+
+                    schema: {
+
+                        type: "string",
+
+                    },
+
+                    example:
+                        "68776d95cf9f12d6c2bb1234",
+
+                },
+
+            ],
+
+            responses: {
+
+                200: {
+
+                    description:
+                        "Reservation cancelled successfully.",
+
+                },
+
+                400: {
+
+                    $ref:
+                        "#/components/responses/BadRequest",
+
+                },
+
+                401: {
+
+                    $ref:
+                        "#/components/responses/Unauthorized",
+
+                },
+
+                404: {
+
+                    $ref:
+                        "#/components/responses/NotFound",
+
+                },
+
+            },
+
+        },
+
+    },
+
 };
+
+
 
 export default reservationPaths;
