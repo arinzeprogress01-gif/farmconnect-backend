@@ -8,7 +8,11 @@ export const createReservation = async (reservationData) => {
 
 export const findReservationById = async (reservationId) => {
 
-    return Reservation.findById(reservationId);
+    return Reservation.findOne({
+
+        reservationId,
+
+    });
 
 };
 
@@ -71,17 +75,28 @@ export const deleteReservation = async (reservationId) => {
 };
 
 export const cancelReservationByUser = async (
+
     reservationId,
+
     updateData
+
 ) => {
 
-    return await Reservation.findByIdAndUpdate(
+    return await Reservation.findOneAndUpdate(
 
-        reservationId,
+        {
+
+            reservationId,
+
+        },
 
         updateData,
 
-        { new: true }
+        {
+
+            new: true,
+
+        }
 
     );
 

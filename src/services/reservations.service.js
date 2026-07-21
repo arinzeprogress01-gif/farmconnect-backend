@@ -556,7 +556,7 @@ export const cancelUserReservation = async (
 
     if (
 
-        reservation.userId.toString()
+        reservation.user.toString()
 
         !==
 
@@ -588,11 +588,11 @@ export const cancelUserReservation = async (
 
     const listing =
 
-        await findListingById(
+    await findListingByObjectId(
 
-            reservation.listingId
+        reservation.listing
 
-        );
+    );
 
     listing.quantity +=
 
