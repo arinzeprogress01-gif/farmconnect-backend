@@ -70,6 +70,8 @@ export const cancelMyReservation = async (
 
     try {
 
+        console.log("req.user:", req.user);
+
         const reservation =
 
             await cancelReservation(

@@ -281,6 +281,13 @@ export const cancelReservation = async (
 
     }
 
+    console.log("===== DEBUG =====");
+console.log("reservation.vendor:", reservation.vendor.toString());
+console.log("vendorId:", vendorId);
+console.log("vendorId.toString():", vendorId.toString());
+console.log("Equal?:", reservation.vendor.toString() === vendorId.toString());
+console.log("=================");
+
     // Vendor Ownership
 
     if (
