@@ -436,20 +436,19 @@ export const completeReservation = async (
 
     }
 
+    const vendorProfile = await findVendorByUserId(vendorId);
+
+    if (!vendorProfile) {
+        throw new NotFoundError("Vendor profile not found.");
+    }
+
     if (
-
         reservation.vendor.toString() !==
-
-        vendorId.toString()
-
+        vendorProfile._id.toString()
     ) {
-
         throw new ForbiddenError(
-
             "You are not allowed to complete this reservation."
-
         );
-
     }
 
     if (
