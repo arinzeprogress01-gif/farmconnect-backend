@@ -1,16 +1,16 @@
 import {
     createNotification,
 } from "../repositories/notification.repository.js";
-
 import {
     sendPushNotification,
 } from "../services/notifications.service.js";
 
-const sendNotification = async ({
+import User from "../models/user.models.js";
+
+
+export default async function sendNotification({
 
     receiver,
-
-    deviceToken = null,
 
     title,
 
@@ -18,58 +18,92 @@ const sendNotification = async ({
 
     type = "system",
 
+    priority = "medium",
+
     data = {},
 
-}) => {
+}) {
 
-    const notification =
+    // Save notification
 
-        await createNotification({
+    await createNotification({
 
-            receiver,
+        receiver,
 
-            title,
+        title,
 
-            message,
+        message,
 
-            type,
+        type,
 
-            data,
+        priority,
 
-        });
+        data,
 
-    if (deviceToken) {
+    });
 
-        try {
+    // Find user
 
-            await sendPushNotification(
+    const user = await User.findById(receiver);
 
-                deviceToken,
+    if (!user) {
 
-                title,
-
-                message,
-
-                data
-
-            );
-
-        } catch (error) {
-
-            console.log(
-
-                "Push notification failed:",
-
-                error.message
-
-            );
-
-        }
+        return;
 
     }
 
-    return notification;
+    // Get active device tokens
 
-};
+    const tokens =
 
-export default sendNotification;
+        user.devices.map(
+
+            device => device.token
+
+        );
+
+    if (
+
+        tokens.length === 0
+
+    ) {
+
+        return;
+
+    }
+
+    // Send Firebase Push
+
+    await sendPushNotification({
+
+        tokens,
+
+        title,
+
+        body: message,
+
+        data: {
+
+            type,
+
+            ...Object.fromEntries(
+
+                Object.entries(data).map(
+
+                    ([key, value]) => [
+
+                        key,
+
+                        String(value),
+
+                    ]
+
+                )
+
+            ),
+
+        },
+
+    });
+
+}
