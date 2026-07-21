@@ -1,6 +1,7 @@
 import Reservation from "../models/reservation.model.js";
 import User from "../models/user.models.js";
 import sendNotification from "../utils/sendNotification.js";
+import { findVendorByUserId } from "../repositories/listing.repository.js";
 
 import {
 
@@ -281,29 +282,19 @@ export const cancelReservation = async (
 
     }
 
-    console.log("===== DEBUG =====");
-console.log("reservation.vendor:", reservation.vendor.toString());
-console.log("vendorId:", vendorId);
-console.log("vendorId.toString():", vendorId.toString());
-console.log("Equal?:", reservation.vendor.toString() === vendorId.toString());
-console.log("=================");
+    const vendorProfile = await findVendorByUserId(vendorId);
 
-    // Vendor Ownership
+    if (!vendorProfile) {
+        throw new NotFoundError("Vendor profile not found.");
+    }
 
     if (
-
         reservation.vendor.toString() !==
-
-        vendorId.toString()
-
+        vendorProfile._id.toString()
     ) {
-
         throw new ForbiddenError(
-
             "You are not allowed to cancel this reservation."
-
         );
-
     }
 
     if (
