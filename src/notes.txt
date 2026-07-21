@@ -1,0 +1,3284 @@
+app url:::: app.use("/api/v1/auth", authRoutes);
+app.use("/api/vendors", vendorRoutes);
+app.use(
+
+    "/api/user",
+
+    appUserRoutes
+
+);
+app.use("/api/listings",listingRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/reservations",
+reservationRoutes);
+app.use(
+
+    "/api/notifications",
+
+    notificationRoutes
+
+);
+app.use(
+    "/api/analytics",
+    analyticsRoutes
+);
+
+
+
+authentication
+
+import bcrypt from "bcrypt";
+
+import sendNotification  from "../utils/sendNotification.js";
+
+import {
+    createUser,
+    findUserByEmail,
+} from "../repositories/user.repository.js";
+
+import {
+
+    updatePasswordReset,
+
+    updatePassword,
+
+    incrementPasswordResetAttempts,
+
+    markPasswordResetVerified,
+
+    clearPasswordReset,
+
+} from "../repositories/auth.repository.js";
+
+
+import { UnauthorizedError } from "../errors/unauthorized-error.js";
+import BadRequestError from "../errors/BadRequestError.js";
+
+
+import { AppError } from "../errors/app.error.js";
+
+import { ConflictError } from "../errors/conflict-error.js";
+
+import { hashPassword, comparePassword } from "../utils/password.utils.js";
+
+import { generateToken } from "../utils/jwt.utils.js";
+
+
+//-------------------------------------------------------
+
+
+
+import generateOTP from "../utils/generateOtp.js";
+
+import forgotPasswordSchema from "../validators/forgotPassword.validator.js";
+
+import verifyOtpSchema from "../validators/verifyOtp.validator.js";
+
+import resetPasswordSchema from "../validators/resetPassword.validator.js";
+
+import {
+
+    sendPushNotification,
+
+} from "./notifications.service.js";
+
+import {
+
+    sendResetEmail,
+
+} from "./email.service.js";
+
+
+
+export const register = async (payload) => {
+
+        const {
+            fullName,
+            email,
+            password,
+            confirmPassword,
+            phone,
+            role,
+        } = payload;
+
+
+    const existingUser = await findUserByEmail(email);
+
+    if (existingUser) {
+        throw new ConflictError("Email already exists.");
+    };
+
+    if (!email) {
+        throw new BadRequestError("Email is required");
+    };
+
+    if(password != confirmPassword) {
+        throw new ConflictError("Passwords do not match.");
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    const user = await createUser({
+        fullName,
+        email,
+        password: hashedPassword,
+        phone,
+        role,
+    });
+
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Welcome to FarmConnect",
+
+        message:
+            "Welcome! Your account has been created successfully.",
+
+        type: "system",
+
+        priority: "medium",
+
+        data: {
+
+            action: "OPEN_HOME",
+
+        },
+
+    });
+
+    const token = generateToken({
+
+        id: user._id,
+
+        role: user.role,
+
+    });
+
+    return {
+
+        user: {
+
+            id: user._id,
+
+            fullName: user.fullName,
+
+            email: user.email,
+
+            phone: user.phone,
+
+            role: user.role,
+
+        },
+
+        token,
+
+    };
+
+};
+
+export const login = async ({ email, password }) => {
+
+    const user = await findUserByEmail(email, true);
+
+    if (!user) {
+        throw new UnauthorizedError("User Does Not Exist");
+    };
+
+    if(!email) {
+        throw new BadRequestError("Email is required");
+    };
+
+    const passwordMatch = await comparePassword(
+        password,
+        user.password
+    );
+
+    if (!passwordMatch) {
+        throw new UnauthorizedError("Invalid password.");
+    }
+
+    const token = generateToken({
+        id: user._id,
+        role: user.role,
+        permissions: user.permissions,
+        isSuperAdmin: user.isSuperAdmin,
+    });
+
+    return {
+
+        user: {
+
+            id: user._id,
+
+            fullName: user.fullName,
+
+            email: user.email,
+
+            phone: user.phone,
+
+            role: user.role,
+
+            profileCompleted: user.profileCompleted,
+
+            permissions: user.permissions,
+
+            isSuperAdmin: user.isSuperAdmin,
+
+        },
+
+        token,
+
+    };
+
+};
+
+export const forgotPassword = async (
+
+    body
+
+) => {
+
+    const { error, value } =
+
+        forgotPasswordSchema.validate(body);
+
+    if (error) {
+
+        throw new BadRequestError(
+
+            error.details[0].message
+
+        );
+
+    }
+
+    const { email } = value;
+
+    const user = await findUserByEmail(
+
+        email,
+
+        true
+
+    );
+
+    /*
+        Do not reveal whether
+        the email exists.
+    */
+
+    if (!user) {
+
+        return {
+
+            message:
+                "If an account exists, an OTP has been sent.",
+
+        };
+
+    }
+
+    const otp = generateOTP();
+
+    const otpHash = await bcrypt.hash(
+
+        otp,
+
+        10
+
+    );
+
+    await updatePasswordReset(
+
+        user,
+
+        {
+
+            otpHash,
+
+            expiresAt:
+
+                new Date(
+
+                    Date.now() +
+
+                    5 * 60 * 1000
+
+                ),
+
+            attempts: 0,
+
+            verified: false,
+
+            createdAt: new Date(),
+
+        }
+
+    );
+
+    if (
+
+        user.devices.length > 0
+
+    ) {
+
+        await sendPushNotification({
+
+            tokens:
+
+                user.devices.map(
+
+                    d => d.token
+
+                ),
+
+            title:
+
+                "FarmConnect",
+
+            body:
+
+                `Your password reset code is ${otp}. It expires in 5 minutes.`,
+
+            data: {
+
+                type:
+
+                    "PASSWORD_RESET",
+
+                email:
+
+                    user.email,
+
+            },
+
+        });
+
+    }
+
+    /*
+        Future Email Support
+    */
+
+    await sendResetEmail(
+
+        user.email,
+
+        otp
+
+    );
+
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Password Reset Requested",
+
+        message:
+            "A password reset request was initiated for your account.",
+
+        type: "security",
+
+        priority: "high",
+
+        data: {
+
+            action: "OPEN_PROFILE",
+
+        },
+
+    });
+
+    return {
+
+        message:
+            "If an account exists, an OTP has been sent.",
+
+    };
+
+};
+
+export const verifyOtp = async (
+
+    body
+
+) => {
+
+    const { error, value } =
+
+        verifyOtpSchema.validate(body);
+
+    if (error) {
+
+        throw new BadRequestError(
+
+            error.details[0].message
+
+        );
+
+    }
+
+    const {
+
+        email,
+
+        otp,
+
+    } = value;
+
+    const user =
+
+        await findUserByEmail(
+
+            email,
+
+            true
+
+        );
+
+    if (!user) {
+
+        throw new UnauthorizedError(
+
+            "Invalid OTP."
+
+        );
+
+    }
+
+    if (
+
+        !user.passwordReset.otpHash
+
+    ) {
+
+        throw new UnauthorizedError(
+
+            "OTP has not been generated."
+
+        );
+
+    }
+
+    if (
+
+        user.passwordReset.expiresAt <
+
+        new Date()
+
+    ) {
+
+        throw new UnauthorizedError(
+
+            "OTP has expired."
+
+        );
+
+    }
+
+    if (
+
+        user.passwordReset.attempts >= 5
+
+    ) {
+
+        throw new UnauthorizedError(
+
+            "Too many attempts. Request another OTP."
+
+        );
+
+    }
+
+    const valid =
+
+        await bcrypt.compare(
+
+            otp,
+
+            user.passwordReset.otpHash
+
+        );
+
+    if (!valid) {
+
+        await incrementPasswordResetAttempts(
+
+            user
+
+        );
+
+        throw new UnauthorizedError(
+
+            "Invalid OTP."
+
+);
+
+    }
+
+        await markPasswordResetVerified(
+
+            user
+
+        );
+
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "OTP Verified",
+
+        message:
+            "Your password reset OTP has been verified successfully.",
+
+        type: "security",
+
+        priority: "medium",
+
+        data: {
+
+            action: "OPEN_PROFILE",
+
+        },
+
+    });
+
+    return {
+
+        message:
+
+            "OTP verified successfully.",
+
+    };
+
+};
+
+export const resetPassword = async (
+
+    body
+
+) => {
+
+    const { error, value } =
+
+        resetPasswordSchema.validate(body);
+
+    if (error) {
+
+        throw new BadRequestError(
+
+            error.details[0].message
+
+        );
+
+    }
+
+    const {
+
+        email,
+
+        newPassword,
+
+    } = value;
+
+    const user =
+
+        await findUserByEmail(
+
+            email,
+
+            true
+
+        );
+
+    if (!user) {
+
+        throw new UnauthorizedError(
+
+            "Invalid request."
+
+        );
+
+    }
+
+    if (
+
+        !user.passwordReset.verified
+
+    ) {
+
+        throw new UnauthorizedError(
+
+            "OTP verification is required."
+
+        );
+
+    }
+
+    const hashedPassword =
+
+        await bcrypt.hash(
+
+            newPassword,
+
+            10
+
+        );
+
+    await updatePassword(
+
+        user,
+
+        hashedPassword
+
+    );
+
+    await clearPasswordReset(
+
+        user
+
+    );
+
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Password Changed",
+
+        message:
+            "Your password has been changed successfully.",
+
+        type: "security",
+
+        priority: "high",
+
+        data: {
+
+            action: "OPEN_PROFILE",
+
+        },
+
+    });
+
+    return {
+
+        message:
+
+            "Password reset successfully.",
+
+    };
+
+};
+
+
+export const logoutUser = async () => {
+
+    return {
+
+        success: true,
+
+        message: "Logged out successfully.",
+
+    };
+
+};
+
+import express from "express";
+
+import authenticate from "../middleware/auth.middleware.js";
+
+import {
+    registerUser,
+    loginUser,
+    logoutUser
+} from "../controllers/auth.controller.js";
+
+import {
+
+    forgotPasswordUser,
+
+    verifyUserOtp,
+
+    resetUserPassword,
+
+} from "../controllers/auth.controller.js";
+
+import { validate} from "../middleware/validate.middleware.js";
+
+import {
+    registerSchema,
+    loginSchema,
+    forgotPasswordSchema,
+} from "../validators/auth.validator.js";
+
+const router = express.Router();
+
+
+router.post(
+    "/register",
+    validate(registerSchema),
+    registerUser
+);
+
+
+router.post(
+    "/login",
+    validate(loginSchema),
+    loginUser
+);
+
+
+router.post(
+
+    "/forgot-password",
+
+    forgotPasswordUser
+
+);
+
+router.post(
+
+    "/verify-otp",
+
+    verifyUserOtp
+
+);
+
+router.post(
+
+    "/reset-password",
+
+    resetUserPassword
+
+);
+
+router.post(
+    "/logout",
+    authenticate,
+    logoutUser
+);
+
+export default router;
+
+appUser
+
+import appUserProfileSchema from "../validators/appUser.validator.js";
+import  sendNotification  from "../utils/sendNotification.js";
+
+import User from "../models/user.models.js";
+
+import {
+    createAppUserProfile,
+    findAppUserByUserId,
+    updateAppUserProfile,
+    deleteAppUserProfile,
+} from "../repositories/appUser.repository.js";
+
+import BadRequestError from "../errors/BadRequestError.js";
+import { ConflictError } from "../errors/conflict-error.js";
+import NotFoundError from "../errors/NotFoundError.js";
+import ForbiddenError from "../errors/ForbiddenError.js";
+
+import { ROLES } from "../constants/roles.js";
+
+export const createUserProfile = async (
+
+    userId,
+
+    profileData
+
+) => {
+
+    const { error, value } =
+
+        appUserProfileSchema.validate(
+
+            profileData
+
+        );
+
+    if (error) {
+
+        throw new BadRequestError(
+
+            error.details[0].message
+
+        );
+
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+
+        throw new NotFoundError(
+
+            "User not found."
+
+        );
+
+    }
+
+    if (user.role !== ROLES.USER) {
+
+        throw new ForbiddenError(
+
+            "Only users can create a profile."
+
+        );
+
+    }
+
+    const existingProfile =
+
+        await findAppUserByUserId(
+
+            userId
+
+        );
+
+    if (existingProfile) {
+
+        throw new ConflictError(
+
+            "User profile already exists."
+
+        );
+
+    }
+
+    const profile =
+
+        await createAppUserProfile({
+
+            userId,
+
+            ...value,
+
+        });
+
+    user.profileCompleted = true;
+
+    await user.save();
+
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Profile Created",
+
+        message:
+            "Your profile has been created successfully.",
+
+        type: "system",
+
+        priority: "low",
+
+    });
+
+    return profile;
+
+};
+
+export const getUserProfile = async (
+
+    userId
+
+) => {
+
+    const profile =
+
+        await findAppUserByUserId(
+
+            userId
+
+        );
+
+    if (!profile) {
+
+        throw new NotFoundError(
+
+            "User profile not found."
+
+        );
+
+    }
+
+    return profile;
+
+};
+
+export const updateUserProfile = async (
+
+    userId,
+
+    profileData
+
+) => {
+
+    const profile =
+
+        await findAppUserByUserId(
+
+            userId
+
+        );
+
+    if (!profile) {
+
+        throw new NotFoundError(
+
+            "User profile not found."
+
+        );
+
+    }
+
+    return await updateAppUserProfile(
+
+        userId,
+
+        profileData
+
+    );
+
+};
+
+export const deleteUserProfile = async (
+
+    userId
+
+) => {
+
+    const profile =
+
+        await findAppUserByUserId(
+
+            userId
+
+        );
+
+    if (!profile) {
+
+        throw new NotFoundError(
+
+            "User profile not found."
+
+        );
+
+    }
+
+    await deleteAppUserProfile(
+
+        userId
+
+    );
+
+    await sendNotification({
+
+        receiver: userId,
+
+        title: "Profile Deleted",
+
+        message:
+            "Your profile has been deleted successfully.",
+
+        type: "system",
+
+        priority: "medium",
+
+    });
+
+    return;
+
+};
+import express from "express";
+
+import authenticate from "../middleware/auth.middleware.js";
+
+import userOnly from "../middleware/userOnly.middleware.js";
+
+import {
+
+    createProfile,
+
+    getProfile,
+
+    updateProfile,
+
+    deleteProfile,
+
+} from "../controllers/appUser.controller.js";
+
+const router = express.Router();
+
+router.post(
+
+    "/profile",
+
+    authenticate,
+
+    userOnly,
+
+    createProfile
+
+);
+
+router.get(
+
+    "/profile",
+
+    authenticate,
+
+    userOnly,
+
+    getProfile
+
+);
+
+router.patch(
+
+    "/profile",
+
+    authenticate,
+
+    userOnly,
+
+    updateProfile
+
+);
+
+router.delete(
+
+    "/profile",
+
+    authenticate,
+
+    userOnly,
+
+    deleteProfile
+
+);
+
+export default router;
+
+vendor
+
+import vendorProfileSchema from "../validators/vendor.validator.js";
+
+import User from "../models/user.models.js";
+
+import sendNotification  from "../utils/sendNotification.js";
+
+import {
+    createVendor,
+    findVendorByUserId,
+    findVendorById,
+    updateVendors,
+    getVendorByUserId,
+    updateVendorProfile,
+    deleteVendorProfile
+
+} from "../repositories/vendor.repository.js";
+
+import BadRequestError from "../errors/BadRequestError.js";
+import { ConflictError} from "../errors/conflict-error.js";
+import ForbiddenError from "../errors/ForbiddenError.js";
+import NotFoundError from "../errors/NotFoundError.js";
+import { ROLES } from "../constants/roles.js";
+
+export const createVendorProfile = async (
+    userId,
+    vendorData
+) => {
+
+    // 1. Validate request body
+    const { error, value } =
+        vendorProfileSchema.validate(vendorData);
+
+    if (error) {
+        throw new BadRequestError(
+            error.details[0].message
+        );
+    }
+
+    // 2. Get authenticated user
+    const user = await User.findById(userId);
+
+    if (!user) {
+        throw new BadRequestError("User not found.");
+    }
+
+    if (user.role !== ROLES.VENDOR) {
+
+        throw new ForbiddenError(
+            "Only vendors can create a vendor profile."
+        );
+
+    }
+
+    // 4. Prevent duplicate profiles
+    const existingVendor =
+        await findVendorByUserId(userId); 
+
+    if (existingVendor) {
+        throw new ConflictError(
+            "Vendor profile already exists."
+        );
+    }
+
+    // 5. Create vendor profile
+    const vendor = await createVendor({
+
+        userId,
+
+        ...value,
+
+    });
+
+    // 6. Mark profile completed
+    user.profileCompleted = true;
+
+    await user.save();
+
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Vendor Profile Created",
+
+        message:
+            "Congratulations! Your vendor profile has been created successfully. You can now start publishing food listings.",
+
+        type: "vendor",
+
+        priority: "medium",
+
+        data: {
+
+            vendorId: vendor._id,
+
+            action: "OPEN_VENDOR_PROFILE",
+
+        },
+
+    });
+
+    return vendor;
+};
+
+export const getVendorProfile = async (
+    userId
+) => {
+
+    const vendor =
+        await getVendorByUserId(userId);
+
+    if (!vendor) {
+
+        throw new NotFoundError(
+            "Vendor profile not found."
+        );
+
+    }
+
+    return vendor;
+
+};
+
+export const updateVendor = async (
+
+    userId,
+
+    vendorData
+
+) => {
+
+    const vendor =
+        await getVendorByUserId(userId);
+
+    if (!vendor) {
+
+        throw new NotFoundError(
+            "Vendor profile not found."
+        );
+
+    }
+
+    const updatedVendor =
+        await updateVendorProfile(
+
+            userId,
+
+            vendorData
+
+        );
+
+    await sendNotification({
+
+        receiver: userId,
+
+        title: "Vendor Profile Updated",
+
+        message:
+            "Your vendor profile has been updated successfully.",
+
+        type: "vendor",
+
+        priority: "low",
+
+        data: {
+
+            vendorId: updatedVendor._id,
+
+            action: "OPEN_VENDOR_PROFILE",
+
+        },
+
+    });
+
+    return updatedVendor;
+
+};
+
+export const deleteVendor = async (
+    userId
+) => {
+
+    const vendor =
+        await getVendorByUserId(userId);
+
+    if (!vendor) {
+
+        throw new NotFoundError(
+            "Vendor profile not found."
+        );
+
+    }
+
+    await deleteVendorProfile(userId);
+
+    await sendNotification({
+
+        receiver: userId,
+
+        title: "Vendor Profile Deleted",
+
+        message:
+            "Your vendor profile has been removed successfully.",
+
+        type: "vendor",
+
+        priority: "high",
+
+        data: {
+
+            action: "OPEN_HOME",
+
+        },
+
+    });
+
+    return;
+
+};
+
+import express from "express";
+
+import authenticate from "../middleware/auth.middleware.js";
+
+import vendorOnly from "../middleware/vendor.middleware.js";
+
+import {
+    createVendorProfile,
+    getVendorProfile,
+    updateVendorProfile,
+    deleteVendorProfile
+} from "../controllers/vendor.controller.js";
+
+const router = express.Router();
+
+router.post(
+
+    "/profile",
+
+    authenticate,
+
+    vendorOnly,
+
+    createVendorProfile
+
+);
+
+router.get(
+
+    "/profile",
+
+    authenticate,
+
+    vendorOnly,
+
+    getVendorProfile
+
+);
+
+router.patch(
+
+    "/profile",
+
+    authenticate,
+
+    vendorOnly,
+
+    updateVendorProfile
+
+);
+
+router.delete(
+
+    "/profile",
+
+    authenticate,
+
+    vendorOnly,
+
+    deleteVendorProfile
+
+);
+
+export default router;
+
+analytics
+
+import {
+    getVendorAnalytics,
+} from "../repositories/analytics.repository.js";
+import {
+
+    getUserDashboardAnalytics as getUserDashboardAnalyticsRepository,
+
+} from "../repositories/analytics.repository.js";
+
+import {
+    findVendorByUserId,
+} from "../repositories/listing.repository.js";
+
+import NotFoundError from "../errors/NotFoundError.js";
+
+export const getDashboardAnalytics = async (
+    userId
+) => {
+
+    const vendor =
+        await findVendorByUserId(
+            userId
+        );
+
+    if (!vendor) {
+
+        throw new NotFoundError(
+            "Vendor profile not found."
+        );
+
+    }
+
+    return await getVendorAnalytics(
+        vendor._id
+    );
+
+};
+
+export const getUserDashboardAnalytics = async (
+
+    userId
+
+) => {
+
+    const reservations =
+
+        await getUserDashboardAnalyticsRepository(
+
+            userId
+
+        );
+
+    const totalReservations =
+
+        reservations.length;
+
+    const activeReservations =
+
+        reservations.filter(
+
+            reservation =>
+
+                reservation.status === "reserved"
+
+        ).length;
+
+    const completedReservations =
+
+        reservations.filter(
+
+            reservation =>
+
+                reservation.status === "completed"
+
+        ).length;
+
+    const cancelledReservations =
+
+        reservations.filter(
+
+            reservation =>
+
+                reservation.status === "cancelled"
+
+        ).length;
+
+    const mealsRescued =
+
+        reservations
+
+            .filter(
+
+                reservation =>
+
+                    reservation.status === "completed"
+
+            )
+
+            .reduce(
+
+                (
+
+                    total,
+
+                    reservation
+
+                ) =>
+
+                    total +
+
+                    reservation.quantityRequested,
+
+                0
+
+            );
+
+    return {
+
+        totalReservations,
+
+        activeReservations,
+
+        completedReservations,
+
+        cancelledReservations,
+
+        mealsRescued,
+
+    };
+
+};
+
+import express from "express";
+
+import authenticate from "../middleware/auth.middleware.js";
+
+import vendorOnly from "../middleware/vendor.middleware.js";
+
+import userOnly from "../middleware/userOnly.middleware.js"
+
+import {
+    dashboardAnalytics,
+    userDashboardAnalytics
+} from "../controllers/analytics.controller.js";
+
+const router = express.Router();
+
+router.get(
+
+    "/dashboard",
+
+    authenticate,
+
+    vendorOnly,
+
+    dashboardAnalytics
+
+);
+
+router.get(
+
+    "/user-dashboard",
+
+    authenticate,
+
+    userOnly,
+
+    userDashboardAnalytics
+
+);
+
+export default router;
+
+listing
+
+import listingSchema from "../validators/listing.validator.js";
+
+import  sendNotification  from "../utils/sendNotification.js";
+
+import User from "../models/user.models.js";
+
+import VendorProfile from "../models/vendor.model.js";
+
+import generateListingId from "../utils/generateListingId.js";
+
+import {
+    createListing,
+    findUserById,
+    findListingById,
+    findVendorByUserId,
+    getVendorListings,
+    updateListing,
+    getMarketListings
+} from "../repositories/listing.repository.js";
+
+import BadRequestError from "../errors/BadRequestError.js";
+import ForbiddenError from "../errors/ForbiddenError.js";
+import { AppError } from "../errors/app.error.js";
+
+export const createNewListing = async (
+
+    userId,
+
+    listingData
+
+) => {
+
+
+    const { error, value } =
+
+        listingSchema.validate(listingData);
+
+    if (error) {
+
+        throw new BadRequestError(
+
+            error.details[0].message
+
+        );
+
+    }
+
+
+    const user = await findUserById(userId);
+
+    if (!user) {
+
+        throw new AppError(
+
+            "User not found.",
+
+            404
+
+        );
+
+    }
+
+
+    if (!user.profileCompleted) {
+
+        throw new ForbiddenError(
+
+            "Complete your vendor profile before creating listings."
+
+        );
+
+    }
+
+
+    const vendor =
+
+        await findVendorByUserId(userId);
+
+    if (!vendor) {
+
+        throw new AppError(
+
+            "Vendor profile not found.",
+
+            404
+
+        );
+
+    }
+
+
+    const listingId =
+
+        await generateListingId();
+
+
+    let pickupLocation;
+
+    if (value.useVendorLocation) {
+
+        pickupLocation =
+
+            vendor.currentLocation;
+
+    } else {
+
+        pickupLocation =
+
+            value.pickupLocation;
+
+    };
+
+    let price = value.price;
+
+    if (value.isFree) {
+
+        price = 0;
+
+    }
+
+
+    const expiresAt =
+
+        new Date(
+
+            Date.now()
+
+            +
+
+            (30 * 60 * 1000)
+
+        );
+
+
+    const listing =
+
+        await createListing({
+
+            listingId,
+
+            vendorId: vendor._id,
+
+            foodName: value.foodName,
+
+            category: value.category,
+
+            description: value.description,
+
+            quantity: value.quantity,
+
+            pickupLocation,
+
+            imageUrls: value.imageUrls,
+
+            isHealthy: value.isHealthy,
+
+            expiresAt,
+
+            isFree: value.isFree,
+
+            price,
+
+        });
+    
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Listing Published",
+
+        message:
+            `${listing.foodName} has been published successfully.`,
+
+        type: "listing",
+
+        priority: "medium",
+
+        data: {
+
+            listingId: listing.listingId,
+
+            action: "OPEN_MY_LISTINGS",
+
+        },
+
+    });
+
+    return listing;
+
+};
+
+export const getMyListings = async (
+
+    userId
+
+) => {
+
+    const vendor =
+
+        await findVendorByUserId(userId);
+
+    if (!vendor) {
+
+        throw new AppError(
+
+            "Vendor profile not found.",
+
+            404
+
+        );
+
+    }
+
+    return await getVendorListings(
+
+        vendor._id
+
+    );
+
+};
+
+
+export const marketList = async () => {
+
+    return await getMarketListings();
+
+};
+
+export const updateMyListing = async (
+
+    listingId,
+
+    userId,
+
+    updateData
+
+) => {
+
+    const vendor =
+
+        await findVendorByUserId(userId);
+
+    if (!vendor) {
+
+        throw new AppError(
+
+            "Vendor profile not found.",
+
+            404
+
+        );
+
+    }
+
+    const listing =
+
+        await findListingById(listingId);
+
+    if (!listing) {
+
+        throw new AppError(
+
+            "Listing not found.",
+
+            404
+
+        );
+
+    }
+
+    if (
+
+        listing.vendorId.toString()
+
+        !==
+
+        vendor._id.toString()
+
+    ) {
+
+        throw new ForbiddenError(
+
+            "You can only update your own listings."
+
+        );
+
+    }
+
+    const updatedListing =
+        await updateListing(
+            listingId,
+            updateData
+        );
+
+    await sendNotification({
+
+        receiver: userId,
+
+        title: "Listing Updated",
+
+        message:
+            `${updatedListing.foodName} has been updated.`,
+
+        type: "listing",
+
+        priority: "low",
+
+        data: {
+
+            listingId:
+                updatedListing.listingId,
+
+            action:
+                "OPEN_MY_LISTINGS",
+
+        },
+
+    });
+
+    return updatedListing;
+
+};
+
+export const deleteMyListing = async (
+
+    listingId,
+
+    userId
+
+) => {
+
+    const vendor =
+
+        await findVendorByUserId(userId);
+
+    if (!vendor) {
+
+        throw new AppError(
+
+            "Vendor profile not found.",
+
+            404
+
+        );
+
+    }
+
+    const listing =
+
+        await findListingById(listingId);
+
+    if (!listing) {
+
+        throw new AppError(
+
+            "Listing not found.",
+
+            404
+
+        );
+
+    }
+
+    if (
+
+        listing.vendorId.toString()
+
+        !==
+
+        vendor._id.toString()
+
+    ) {
+
+        throw new ForbiddenError(
+
+            "You can only delete your own listings."
+
+        );
+
+    }
+
+    const cancelledListing =
+        await updateListing(
+            listingId,
+            {
+
+                isActive: false,
+
+                status: "cancelled",
+
+            }
+        );
+
+    await sendNotification({
+
+        receiver: userId,
+
+        title: "Listing Cancelled",
+
+        message:
+            `${cancelledListing.foodName} has been removed from the marketplace.`,
+
+        type: "listing",
+
+        priority: "high",
+
+        data: {
+
+            listingId:
+                cancelledListing.listingId,
+
+            action:
+                "OPEN_MY_LISTINGS",
+
+        },
+
+    });
+
+    return cancelledListing;
+
+};
+
+import express from "express";
+
+import authenticate from "../middleware/auth.middleware.js";
+
+import vendorOnly from "../middleware/vendor.middleware.js";
+
+import {
+    createListing,
+    getMyListings,
+    updateListing,
+    deleteListing,
+    marketList
+    
+} from "../controllers/listing.controller.js";
+
+const router = express.Router();
+
+router.post(
+
+    "/",
+
+    authenticate,
+
+    vendorOnly,
+
+    createListing
+
+);
+
+router.get(
+
+    "/my-listings",
+
+    authenticate,
+
+    vendorOnly,
+
+    getMyListings
+
+);
+
+router.get(
+
+    "/market-list",
+
+    marketList
+
+);
+
+router.patch(
+
+    "/:listingId",
+
+    authenticate,
+
+    vendorOnly,
+
+    updateListing
+
+);
+
+router.delete(
+
+    "/:listingId",
+
+    authenticate,
+
+    vendorOnly,
+
+    deleteListing
+
+);
+
+export default router; 
+
+notification
+
+import {
+
+    findNotificationById,
+
+    getUserNotifications,
+
+    getUnreadNotifications,
+
+    updateNotification,
+
+    markAllAsRead,
+
+} from "../repositories/notification.repository.js";
+
+import NotFoundError from "../errors/NotFoundError.js";
+
+import ForbiddenError from "../errors/ForbiddenError.js";
+
+export const getMyNotifications = async (
+
+    userId
+
+) => {
+
+    return await getUserNotifications(
+
+        userId
+
+    );
+
+};
+
+export const getMyUnreadNotifications = async (
+
+    userId
+
+) => {
+
+    return await getUnreadNotifications(
+
+        userId
+
+    );
+
+};
+
+export const getNotificationDetails = async (
+
+    notificationId,
+
+    userId
+
+) => {
+
+    const notification =
+
+        await findNotificationById(
+
+            notificationId
+
+        );
+
+    if (!notification) {
+
+        throw new NotFoundError(
+
+            "Notification not found."
+
+        );
+
+    }
+
+    if (
+
+        notification.receiver.toString()
+
+        !==
+
+        userId.toString()
+
+    ) {
+
+        throw new ForbiddenError(
+
+            "You are not allowed to view this notification."
+
+        );
+
+    }
+
+    return notification;
+
+};
+
+export const markNotificationAsRead = async (
+
+    notificationId,
+
+    userId
+
+) => {
+
+    const notification =
+
+        await findNotificationById(
+
+            notificationId
+
+        );
+
+    if (!notification) {
+
+        throw new NotFoundError(
+
+            "Notification not found."
+
+        );
+
+    }
+
+    if (
+
+        notification.receiver.toString()
+
+        !==
+
+        userId.toString()
+
+    ) {
+
+        throw new ForbiddenError(
+
+            "You are not allowed to update this notification."
+
+        );
+
+    }
+
+    notification.isRead = true;
+
+    return await updateNotification(
+
+        notification
+
+    );
+
+};
+
+export const markEveryNotificationAsRead = async (
+
+    userId
+
+) => {
+
+    return await markAllAsRead(
+
+        userId
+
+    );
+
+};
+
+import express from "express";
+
+import authenticate from "../middleware/auth.middleware.js";
+
+import {
+
+    getNotifications,
+
+    getUnreadNotifications,
+
+    getNotification,
+
+    readNotification,
+
+    readAllNotifications,
+
+} from "../controllers/notification.controller.js";
+
+const router = express.Router();
+
+router.use(authenticate);
+
+router.get(
+
+    "/",
+
+    getNotifications
+
+);
+
+router.get(
+
+    "/unread",
+
+    getUnreadNotifications
+
+);
+
+router.get(
+
+    "/:notificationId",
+
+    getNotification
+
+);
+
+router.patch(
+
+    "/:notificationId/read",
+
+    readNotification
+
+);
+
+router.patch(
+
+    "/read-all",
+
+    readAllNotifications
+
+);
+
+export default router;
+
+bonus to note: import { messaging } from "../config/firebase.js";
+
+export const sendPushNotification = async ({
+
+    tokens,
+
+    title,
+
+    body,
+
+    data = {},
+
+}) => {
+
+    if (
+
+        !tokens ||
+
+        tokens.length === 0
+
+    ) {
+
+        return;
+
+    }
+
+    await messaging.sendEachForMulticast({
+
+        tokens,
+
+        notification: {
+
+            title,
+
+            body,
+
+        },
+
+        data,
+
+    });
+
+};
+
+import express from "express";
+
+import  authenticate  from "../middleware/auth.middleware.js";
+
+import {
+
+    registerDevice,
+
+} from "../controllers/user.controller.js";
+
+const router = express.Router();
+
+router.post(
+
+    "/device",
+
+    authenticate,
+
+    registerDevice
+
+);
+
+export default router;
+
+import deviceSchema from "../validators/device.validator.js";
+
+import BadRequestError from "../errors/BadRequestError.js";
+
+import NotFoundError from "../errors/NotFoundError.js";
+
+import {
+
+    findUserById,
+
+    registerUserDevice,
+
+} from "../repositories/user.repository.js";
+
+export const registerDevice = async (
+
+    userId,
+
+    deviceData
+
+) => {
+
+    const { error, value } =
+
+        deviceSchema.validate(
+
+            deviceData
+
+        );
+
+    if (error) {
+
+        throw new BadRequestError(
+
+            error.details[0].message
+
+        );
+
+    }
+
+    const user =
+
+        await findUserById(userId);
+
+    if (!user) {
+
+        throw new NotFoundError(
+
+            "User not found."
+
+        );
+
+    }
+
+    await registerUserDevice(
+
+        user,
+
+        value
+
+    );
+
+    return {
+
+        message:
+
+            "Device registered successfully.",
+
+    };
+
+}; we need to note for push...
+
+reservation
+
+import Reservation from "../models/reservation.model.js";
+import User from "../models/user.models.js";
+import sendNotification from "../utils/sendNotification.js";
+
+import {
+
+    cancelReservationByUser,
+
+} from "../repositories/reservation.repository.js";
+
+import reservationSchema from "../validators/reservation.validator.js";
+
+import {
+    createReservation,
+    findReservationById,
+    findReservationByReservationId,
+    getVendorReservations,
+    getUserReservations,
+    updateReservation,
+    deleteReservation,
+} from "../repositories/reservation.repository.js";
+
+import {
+    findListingById,
+    findListingByObjectId,
+} from "../repositories/listing.repository.js";
+
+import generateReservationId from "../utils/generateReservationId.js";
+import generatePickupCode from "../utils/generatePickupCode.js";
+
+import BadRequestError from "../errors/BadRequestError.js";
+import ForbiddenError from "../errors/ForbiddenError.js";
+import NotFoundError from "../errors/NotFoundError.js";
+
+
+
+export const reserveListing = async (
+    userId,
+    reservationData
+) => {
+
+    const { error, value } =
+        reservationSchema.validate(
+            reservationData
+        );
+
+    if (error) {
+
+        throw new BadRequestError(
+            error.details[0].message
+        );
+
+    }
+
+    const {
+        listingId,
+        quantityRequested,
+    } = value;
+
+    const user =
+        await User.findById(userId);
+
+    if (!user) {
+
+        throw new NotFoundError(
+            "User not found."
+        );
+
+    }
+
+    const listing =
+        await findListingById(
+            listingId
+        );
+
+    if (!listing) {
+
+        throw new NotFoundError(
+            "Food listing not found."
+        );
+
+    }
+
+    if (
+        listing.status !== "available" ||
+        !listing.isActive
+    ) {
+
+        throw new BadRequestError(
+            "This food listing is no longer available."
+        );
+
+    }
+
+    if (
+        quantityRequested >
+        listing.quantity
+    ) {
+
+        throw new BadRequestError(
+            "Requested quantity exceeds available quantity."
+        );
+
+    }
+
+    const reservation = await createReservation({
+
+        reservationId:
+            generateReservationId(),
+
+        pickupCode:
+            generatePickupCode(),
+
+        listing:
+            listing._id,
+
+        vendor:
+            listing.vendorId,
+
+        user:
+            user._id,
+
+        foodName:
+            listing.foodName,
+
+        category:
+            listing.category,
+
+        pickupLocation:
+            listing.pickupLocation,
+
+        quantityRequested,
+
+        status: "reserved",
+
+    });
+
+    listing.quantity -= quantityRequested;
+
+    listing.totalReservations += 1;
+
+    if (listing.quantity <= 0) {
+
+        listing.quantity = 0;
+
+        listing.status = "completed";
+
+        listing.isActive = false;
+
+    }
+
+    await listing.save();
+
+    /*
+        Store Notification
+
+        Push Notification
+
+        Email Notification
+    */
+    
+    await sendNotification({
+
+    receiver: listing.vendorId,
+
+    title: "New Reservation",
+
+    message:
+        `${user.fullName} reserved ${quantityRequested} portion(s) of ${listing.foodName}.`,
+
+    type: "reservation",
+
+    priority: "high",
+
+    data: {
+
+        reservationId:
+            reservation.reservationId,
+
+        listingId:
+            listing.listingId,
+
+        action:
+            "OPEN_VENDOR_RESERVATIONS",
+
+    },
+
+});
+
+    await sendNotification({
+
+        receiver: user._id,
+
+        title: "Reservation Confirmed",
+
+        message:
+            `Your reservation for ${listing.foodName} was successful. Pickup Code: ${reservation.pickupCode}.`,
+
+        type: "reservation",
+
+        priority: "high",
+
+        data: {
+
+            reservationId:
+                reservation.reservationId,
+
+            action:
+                "OPEN_MY_RESERVATIONS",
+
+        },
+
+    });
+
+    if (listing.quantity === 0) {
+
+        await sendNotification({
+
+            receiver: listing.vendorId,
+
+            title: "Listing Completed",
+
+            message:
+                `${listing.foodName} has been completely reserved.`,
+
+            type: "listing",
+
+            priority: "medium",
+
+            data: {
+
+                listingId:
+                    listing.listingId,
+
+                action:
+                    "OPEN_MY_LISTINGS",
+
+            },
+
+        });
+
+    }
+
+    return reservation;
+
+};
+
+export const cancelReservation = async (
+
+    vendorId,
+
+    reservationId,
+
+    cancellationReason
+
+) => {
+
+    if (!cancellationReason?.trim()) {
+
+        throw new BadRequestError(
+
+            "Cancellation reason is required."
+
+        );
+
+    }
+
+    const reservation = await findReservationById(
+
+        reservationId
+
+    );
+
+    if (!reservation) {
+
+        throw new NotFoundError(
+
+            "Reservation not found."
+
+        );
+
+    }
+
+    // Vendor Ownership
+
+    if (
+
+        reservation.vendor.toString() !==
+
+        vendorId.toString()
+
+    ) {
+
+        throw new ForbiddenError(
+
+            "You are not allowed to cancel this reservation."
+
+        );
+
+    }
+
+    if (
+
+        reservation.status === "completed"
+
+    ) {
+
+        throw new BadRequestError(
+
+            "Completed reservations cannot be cancelled."
+
+        );
+
+    }
+
+    if (
+
+        reservation.status === "cancelled"
+
+    ) {
+
+        throw new BadRequestError(
+
+            "Reservation has already been cancelled."
+
+        );
+
+    }
+
+    const listing = await findListingByObjectId(
+
+        reservation.listing
+
+    );
+
+    if (!listing) {
+
+        throw new NotFoundError(
+
+            "Food listing not found."
+
+        );
+
+    }
+
+    // Restore Quantity
+
+    listing.quantity +=
+
+        reservation.quantityRequested;
+
+    // Re-open listing if necessary
+
+    if (
+
+        listing.status === "completed"
+
+    ) {
+
+        listing.status = "available";
+
+        listing.isActive = true;
+
+    }
+
+    await listing.save();
+
+    reservation.status = "cancelled";
+
+    reservation.cancellationReason = cancellationReason;
+
+    await updateReservation(reservation);
+
+    /*
+
+        Store Notification
+
+        Push Notification
+
+        Email Notification
+
+    */
+
+    await sendNotification({
+
+        receiver: reservation.user,
+
+        title: "Reservation Cancelled",
+
+        message:
+            `Your reservation for ${reservation.foodName} was cancelled.
+
+Reason: ${cancellationReason}`,
+
+        type: "reservation",
+
+        priority: "high",
+
+        data: {
+
+            reservationId:
+                reservation.reservationId,
+
+            action:
+                "OPEN_MY_RESERVATIONS",
+
+        },
+
+    });
+
+    return reservation;
+
+};
+
+export const completeReservation = async (
+
+    vendorId,
+
+    reservationId
+
+) => {
+
+    const reservation =
+
+        await findReservationById(
+
+            reservationId
+
+        );
+
+    if (!reservation) {
+
+        throw new NotFoundError(
+
+            "Reservation not found."
+
+        );
+
+    }
+
+    if (
+
+        reservation.vendor.toString() !==
+
+        vendorId.toString()
+
+    ) {
+
+        throw new ForbiddenError(
+
+            "You are not allowed to complete this reservation."
+
+        );
+
+    }
+
+    if (
+
+        reservation.status === "completed"
+
+    ) {
+
+        throw new BadRequestError(
+
+            "Reservation has already been completed."
+
+        );
+
+    }
+
+    if (
+
+        reservation.status === "cancelled"
+
+    ) {
+
+        throw new BadRequestError(
+
+            "Cancelled reservations cannot be completed."
+
+        );
+
+    }
+
+    reservation.status = "completed";
+
+    reservation.completedAt = new Date();
+
+    await updateReservation(reservation);
+
+    /*
+
+        Store Notification
+
+        Push Notification
+
+        Email Notification
+
+    */
+    await sendNotification({
+
+        receiver: reservation.user,
+
+        title: "Reservation Completed",
+
+        message:
+            `Your reservation for ${reservation.foodName} has been marked as completed.`,
+
+        type: "reservation",
+
+        priority: "medium",
+
+        data: {
+
+            reservationId:
+                reservation.reservationId,
+
+            action:
+                "OPEN_MY_RESERVATIONS",
+
+        },
+
+    });
+
+    return reservation;
+
+};
+
+export const cancelUserReservation = async (
+
+    userId,
+
+    reservationId
+
+) => {
+
+    const reservation =
+
+        await findReservationById(
+
+            reservationId
+
+        );
+
+    if (!reservation) {
+
+        throw new AppError(
+
+            "Reservation not found.",
+
+            404
+
+        );
+
+    }
+
+    if (
+
+        reservation.userId.toString()
+
+        !==
+
+        userId.toString()
+
+    ) {
+
+        throw new ForbiddenError(
+
+            "You can only cancel your own reservation."
+
+        );
+
+    }
+
+    if (
+
+        reservation.status !== "reserved"
+
+    ) {
+
+        throw new BadRequestError(
+
+            "Only active reservations can be cancelled."
+
+        );
+
+    }
+
+    const listing =
+
+        await findListingById(
+
+            reservation.listingId
+
+        );
+
+    listing.quantity +=
+
+        reservation.quantityRequested;
+
+    await listing.save();
+
+    const updatedReservation =
+
+        await cancelReservationByUser(
+
+            reservationId,
+
+            {
+
+                status: "cancelled",
+
+                cancelledBy: "user",
+
+            }
+
+        );
+
+    // Vendor notification
+
+    await sendNotification({
+
+        receiver: listing.vendorId,
+
+        title: "Reservation Cancelled",
+
+        message:
+            "A user cancelled their reservation.",
+
+        type: "reservation",
+
+        priority: "medium",
+
+        data: {
+
+            reservationId,
+
+        },
+
+    });
+
+    // User notification
+
+    await sendNotification({
+
+        receiver: userId,
+
+        title: "Reservation Cancelled",
+
+        message:
+            "Your reservation has been cancelled successfully.",
+
+        type: "reservation",
+
+        priority: "medium",
+
+        data: {
+
+            reservationId,
+
+        },
+
+    });
+
+    return updatedReservation;
+
+};
+
+export const getTheVendorReservations = async (
+
+    vendorId
+
+) => {
+
+    return Reservation.find({
+
+        vendor: vendorId,
+
+    })
+
+        .populate("user", "fullName email phone")
+
+        .populate(
+
+            "listing",
+
+            "foodName pickupLocation"
+
+        )
+
+        .sort({
+
+            createdAt: -1,
+
+        });
+
+};
+
+export const getTheUserReservations = async (
+
+    userId
+
+) => {
+
+    return Reservation.find({
+
+        user: userId,
+
+    })
+
+        .populate(
+
+            "listing",
+
+            "foodName pickupLocation"
+
+        )
+
+        .populate(
+
+            "vendor",
+
+            "businessName"
+
+        )
+
+        .sort({
+
+            createdAt: -1,
+
+        });
+
+};
+
+export const getVendorReservationHistory = async (
+
+    vendorId
+
+) => {
+
+    return await getVendorReservations(
+
+        vendorId
+
+    );
+
+};
+
+export const getUserReservationHistory = async (
+
+    userId
+
+) => {
+
+    return await getUserReservations(
+
+        userId
+
+    );
+
+};
+
+import express from "express";
+
+import authenticate from "../middleware/auth.middleware.js";
+
+import vendorOnly from "../middleware/vendor.middleware.js";
+
+import userOnly from "../middleware/userOnly.middleware.js";
+
+import {
+
+    reserveFood,
+
+    cancelMyReservation,
+
+    completeMyReservation,
+
+    getVendorReservations,
+
+    getUserReservations,
+
+    getVendorHistory,
+
+    getUserHistory,
+
+    cancelReservationByUser,
+
+} from "../controllers/reservation.controller.js";
+
+const router = express.Router();
+
+router.post(
+
+    "/",
+
+    authenticate,
+
+    userOnly,
+
+    reserveFood
+
+);
+
+router.get(
+
+    "/my-reservations",
+
+    authenticate,
+
+    userOnly,
+
+    getUserReservations
+
+);
+
+router.get(
+
+    "/my-history",
+
+    authenticate,
+
+    userOnly,
+
+    getUserHistory
+
+);
+
+router.get(
+
+    "/vendor",
+
+    authenticate,
+
+    vendorOnly,
+
+    getVendorReservations
+
+);
+
+router.get(
+
+    "/vendor/history",
+
+    authenticate,
+
+    vendorOnly,
+
+    getVendorHistory
+
+);
+
+router.patch(
+    "/:reservationId/complete",
+
+    authenticate,
+
+    vendorOnly,
+
+    completeMyReservation
+
+);
+
+router.patch(
+
+    "/:reservationId/cancel",
+
+    authenticate,
+
+    vendorOnly,
+
+    cancelMyReservation
+
+);
+
+router.patch(
+
+    "/:reservationId/user-cancel",
+
+    authenticate,
+
+    userOnly,
+
+    cancelReservationByUser
+
+);
+
+export default router;
+

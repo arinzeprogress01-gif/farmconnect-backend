@@ -1,6 +1,12 @@
 import Reservation from "../models/reservation.model.js";
 import User from "../models/user.models.js";
-import  sendNotification  from "../utils/sendNotification.js";
+import sendNotification from "../utils/sendNotification.js";
+
+import {
+
+    cancelReservationByUser,
+
+} from "../repositories/reservation.repository.js";
 
 import reservationSchema from "../validators/reservation.validator.js";
 
@@ -517,6 +523,146 @@ export const completeReservation = async (
     });
 
     return reservation;
+
+};
+
+export const cancelUserReservation = async (
+
+    userId,
+
+    reservationId
+
+) => {
+
+    const reservation =
+
+        await findReservationById(
+
+            reservationId
+
+        );
+
+    if (!reservation) {
+
+        throw new AppError(
+
+            "Reservation not found.",
+
+            404
+
+        );
+
+    }
+
+    if (
+
+        reservation.userId.toString()
+
+        !==
+
+        userId.toString()
+
+    ) {
+
+        throw new ForbiddenError(
+
+            "You can only cancel your own reservation."
+
+        );
+
+    }
+
+    if (
+
+        reservation.status !== "reserved"
+
+    ) {
+
+        throw new BadRequestError(
+
+            "Only active reservations can be cancelled."
+
+        );
+
+    }
+
+    const listing =
+
+        await findListingById(
+
+            reservation.listingId
+
+        );
+
+    listing.quantity +=
+
+        reservation.quantityRequested;
+
+    await listing.save();
+
+    const updatedReservation =
+
+        await cancelReservationByUser(
+
+            reservationId,
+
+            {
+
+                status: "cancelled",
+
+                cancelledBy: "user",
+
+            }
+
+        );
+
+    // Vendor notification
+
+    await sendNotification({
+
+        receiver: listing.vendorId,
+
+        title: "Reservation Cancelled",
+
+        message:
+            "A user cancelled their reservation.",
+
+        type: "reservation",
+
+        priority: "medium",
+
+        data: {
+
+            reservationId,
+
+        },
+
+    });
+
+    // User notification
+
+    await sendNotification({
+
+        receiver: userId,
+
+        title: "Reservation Cancelled",
+
+        message:
+            "Your reservation has been cancelled successfully.",
+
+        type: "reservation",
+
+        priority: "medium",
+
+        data: {
+
+            reservationId,
+
+        },
+
+    });
+
+    return updatedReservation;
 
 };
 

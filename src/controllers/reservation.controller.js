@@ -14,6 +14,8 @@ import {
 
     getUserReservationHistory,
 
+    cancelUserReservation
+
 } from "../services/reservations.service.js";
 
 export const reserveFood = async (
@@ -285,6 +287,50 @@ export const getUserHistory = async (
         });
 
     } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
+export const cancelReservationByUser = async (
+
+    req,
+
+    res,
+
+    next
+
+) => {
+
+    try {
+
+        const reservation =
+
+            await cancelUserReservation(
+
+                req.user._id,
+
+                req.params.reservationId
+
+            );
+
+        res.status(200).json({
+
+            success: true,
+
+            message:
+
+                "Reservation cancelled successfully.",
+
+            data: reservation,
+
+        });
+
+    }
+
+    catch (error) {
 
         next(error);
 

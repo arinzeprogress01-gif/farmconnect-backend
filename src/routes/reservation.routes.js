@@ -22,6 +22,8 @@ import {
 
     getUserHistory,
 
+    cancelReservationByUser,
+
 } from "../controllers/reservation.controller.js";
 
 const router = express.Router();
@@ -106,6 +108,18 @@ router.patch(
     vendorOnly,
 
     cancelMyReservation
+
+);
+
+router.patch(
+
+    "/:reservationId/user-cancel",
+
+    authenticate,
+
+    userOnly,
+
+    cancelReservationByUser
 
 );
 

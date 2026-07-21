@@ -69,3 +69,20 @@ export const deleteReservation = async (reservationId) => {
     return Reservation.findByIdAndDelete(reservationId);
 
 };
+
+export const cancelReservationByUser = async (
+    reservationId,
+    updateData
+) => {
+
+    return await Reservation.findByIdAndUpdate(
+
+        reservationId,
+
+        updateData,
+
+        { new: true }
+
+    );
+
+};
