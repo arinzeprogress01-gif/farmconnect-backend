@@ -23,6 +23,10 @@ import notFound from "./middleware/not-found.middleware.js";
 import errorHandler from "./middleware/error.middleware.js";
 
 import {
+    startReservationExpirationJob,
+} from "./jobs/reservationExpiration.job.js";
+
+import {
     startListingExpirationJob,
 } from "./jobs/listingExpiration.job.js";
 
@@ -97,5 +101,7 @@ app.use(notFound);
 app.use(errorHandler);
 
 startListingExpirationJob();
+
+startReservationExpirationJob();
 
 export default app;

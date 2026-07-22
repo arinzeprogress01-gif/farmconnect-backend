@@ -9,7 +9,9 @@ import {
     getMyListings,
     updateListing,
     deleteListing,
-    marketList
+    marketList,
+    getListingsByCategory,
+    getFoodCategories,
     
 } from "../controllers/listing.controller.js";
 
@@ -44,6 +46,22 @@ router.get(
     "/market-list",
 
     marketList
+
+);
+
+router.get(
+
+    "/categories",
+
+    getFoodCategories
+
+);
+
+router.get(
+
+    "/category/:category",
+
+    getListingsByCategory
 
 );
 

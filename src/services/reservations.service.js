@@ -67,6 +67,40 @@ export const reserveListing = async (
             "User not found."
         );
 
+    };
+
+    if (
+
+        user.reservationBlockedUntil &&
+
+        user.reservationBlockedUntil >
+
+        new Date()
+
+    ) {
+
+        const minutesLeft = Math.ceil(
+
+            (
+
+                user.reservationBlockedUntil -
+
+                new Date()
+
+            )
+
+            /
+
+            (60 * 1000)
+
+        );
+
+        throw new BadRequestError(
+
+            `You cancelled a reservation recently. Please wait ${minutesLeft} minute(s) before making another reservation.`
+
+        );
+
     }
 
     const listing =
@@ -359,7 +393,7 @@ export const cancelReservation = async (
 
         listing.isActive = true;
 
-    }
+    };
 
     await listing.save();
 
@@ -368,6 +402,22 @@ export const cancelReservation = async (
     reservation.cancellationReason = cancellationReason;
 
     await updateReservation(reservation);
+
+    const user = await findUserById(userId);
+
+    user.reservationBlockedUntil =
+
+        new Date(
+
+            Date.now()
+
+            +
+
+            (60 * 60 * 1000)
+
+        );
+
+    await user.save();
 
     /*
 

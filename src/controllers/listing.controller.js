@@ -94,11 +94,19 @@ export const marketList = async (
 
         const listings =
 
-            await listingService.marketList();
+            await listingService.getMarketLists(
 
-        return res.status(200).json({
+                req.query
+
+            );
+
+        res.status(200).json({
 
             success: true,
+
+            message:
+
+                "Marketplace listings retrieved successfully.",
 
             count: listings.length,
 
@@ -106,9 +114,7 @@ export const marketList = async (
 
         });
 
-    }
-
-    catch (error) {
+    } catch (error) {
 
         next(error);
 
@@ -191,6 +197,84 @@ export const deleteListing = async (
                 "Listing removed successfully.",
 
             data: listing,
+
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
+export const getListingsByCategory = async (
+
+    req,
+
+    res,
+
+    next
+
+) => {
+
+    try {
+
+        const listings =
+
+            await listingService.getListingsByCategory(
+
+                req.params.category
+
+            );
+
+        res.status(200).json({
+
+            success: true,
+
+            message:
+
+                "Listings retrieved successfully.",
+
+            count: listings.length,
+
+            data: listings,
+
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
+export const getFoodCategories = async (
+
+    req,
+
+    res,
+
+    next
+
+) => {
+
+    try {
+
+        const categories =
+
+            await listingService.getFoodCategories();
+
+        res.status(200).json({
+
+            success: true,
+
+            message: "Food categories retrieved successfully.",
+
+            count: categories.length,
+
+            data: categories,
 
         });
 

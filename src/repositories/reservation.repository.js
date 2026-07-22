@@ -26,6 +26,28 @@ export const findReservationByReservationId = async (reservationId) => {
 
 };
 
+export const findExpiredReservations = async () => {
+
+    return Reservation.find({
+
+        status: "reserved",
+
+        reservedAt: {
+
+            $lte: new Date(
+
+                Date.now() -
+
+                15 * 60 * 1000
+
+            ),
+
+        },
+
+    });
+
+};
+
 export const getVendorReservations = async (vendorId) => {
 
     return Reservation.find({

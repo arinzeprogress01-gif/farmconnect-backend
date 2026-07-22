@@ -88,6 +88,18 @@ const listingSchema = Joi.object({
 
         }),
 
+    pickupDuration: Joi.string()
+
+        .trim()
+
+        .default("Flexible"),
+
+    expiryDuration: Joi.number()
+        .integer()
+        .min(30)
+        .max(1440)
+        .default(720),
+
     imageUrls: Joi.array()
 
         .items(

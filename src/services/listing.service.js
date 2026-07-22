@@ -2,6 +2,8 @@ import listingSchema from "../validators/listing.validator.js";
 
 import  sendNotification  from "../utils/sendNotification.js";
 
+import { FOOD_CATEGORIES } from "../constants/foodCategories.js";
+
 import User from "../models/user.models.js";
 
 import VendorProfile from "../models/vendor.model.js";
@@ -15,7 +17,9 @@ import {
     findVendorByUserId,
     getVendorListings,
     updateListing,
-    getMarketListings
+    getMarketListings,
+    findListingsByCategory,
+    getMarketListings as getMarketListingsRepo,
 } from "../repositories/listing.repository.js";
 
 import BadRequestError from "../errors/BadRequestError.js";
@@ -116,20 +120,21 @@ export const createNewListing = async (
 
         price = 0;
 
-    }
+    };
 
+    const expiryDuration =
 
-    const expiresAt =
+        data.expiryDuration || 720;
 
-        new Date(
+    const expiresAt = new Date(
 
-            Date.now()
+        Date.now()
 
-            +
+        +
 
-            (30 * 60 * 1000)
+        (expiryDuration * 60 * 1000)
 
-        );
+    );
 
 
     const listing =
@@ -153,6 +158,8 @@ export const createNewListing = async (
             imageUrls: value.imageUrls,
 
             isHealthy: value.isHealthy,
+
+            expiryDuration,
 
             expiresAt,
 
@@ -220,9 +227,35 @@ export const getMyListings = async (
 };
 
 
-export const marketList = async () => {
+export const getMarketLists = async (query) => {
 
-    return await getMarketListings();
+    if (query.category) {
+
+        const validCategory = FOOD_CATEGORIES.find(
+
+            item =>
+
+                item.toLowerCase() ===
+
+                query.category.toLowerCase()
+
+        );
+
+        if (!validCategory) {
+
+            throw new BadRequestError(
+
+                "Invalid food category."
+
+            );
+
+        }
+
+        query.category = validCategory;
+
+    }
+
+    return await getMarketListingsRepo(query);
 
 };
 
@@ -417,5 +450,41 @@ export const deleteMyListing = async (
     });
 
     return cancelledListing;
+
+};
+
+export const getListingsByCategory = async (category) => {
+
+    const validCategory = FOOD_CATEGORIES.find(
+
+        item =>
+
+            item.toLowerCase() ===
+
+            category.toLowerCase()
+
+    );
+
+    if (!validCategory) {
+
+        throw new BadRequestError(
+
+            "Invalid food category."
+
+        );
+
+    }
+
+    return await findListingsByCategory(
+
+        validCategory
+
+    );
+
+};
+
+export const getFoodCategories = async () => {
+
+    return FOOD_CATEGORIES;
 
 };

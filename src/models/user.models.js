@@ -169,6 +169,14 @@ const userSchema = new mongoose.Schema(
       default: false,
 
     },
+
+    reservationBlockedUntil: {
+
+      type: Date,
+
+      default: null,
+
+    },
   },
   {
     timestamps: true,

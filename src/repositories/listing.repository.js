@@ -61,41 +61,103 @@ export const getVendorListings = async (
 
 };
 
-export const getMarketListings = async () => {
+export const getMarketListings = async (filters = {}) => {
 
-    return await Listing.find({
+    const {
 
-        isActive: true,
+        category,
+
+        location,
+
+        search,
+
+    } = filters;
+
+    const query = {
 
         status: "available",
 
-        quantity: {
+        isActive: true,
 
-            $gt: 0,
+    };
+
+    if (category) {
+
+        query.category = {
+
+            $regex: new RegExp(`^${category}$`, "i"),
+
+        };
+
+    }
+
+    if (location) {
+
+        query.pickupLocation = {
+
+            $regex: new RegExp(location, "i"),
+
+        };
+
+    }
+
+    if (search) {
+
+        query.foodName = {
+
+            $regex: new RegExp(search, "i"),
+
+        };
+
+    }
+
+    return await Listing.find(query)
+
+        .populate(
+
+            "vendorId",
+
+            "businessName currentLocation profileImage"
+
+        )
+
+        .sort({
+
+            createdAt: -1,
+
+        });
+
+};
+
+export const findListingsByCategory = async (category) => {
+
+    return await Listing.find({
+
+        category: {
+
+            $regex: new RegExp(`^${category}$`, "i"),
 
         },
 
-        expiresAt: {
+        status: "available",
 
-            $gt: new Date(),
-
-        },
+        isActive: true,
 
     })
 
-    .populate({
+        .populate(
 
-        path: "vendorId",
+            "vendorId",
 
-        select: "businessName profileImage businessType",
+            "businessName currentLocation profileImage"
 
-    })
+        )
 
-    .sort({
+        .sort({
 
-        createdAt: -1,
+            createdAt: -1,
 
-    });
+        });
 
 };
 

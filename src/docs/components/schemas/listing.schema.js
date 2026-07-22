@@ -168,6 +168,32 @@ const listingSchemas = {
 
             },
 
+            pickupDuration: {
+
+                type: "string",
+
+                example: "30 minutes",
+
+                default: "Flexible",
+
+                description:
+                    "Optional pickup duration specified by the vendor. If omitted, it defaults to 'Flexible', allowing pickup anytime before the listing expires.",
+
+            },
+
+            expiryDuration: {
+
+                type: "number",
+
+                example: 720,
+
+                default: 720,
+
+                description:
+                    "Optional listing expiry duration in minutes. If omitted, the listing automatically expires after 12 hours (720 minutes).",
+
+            },
+
             imageUrls: {
 
                 type: "array",

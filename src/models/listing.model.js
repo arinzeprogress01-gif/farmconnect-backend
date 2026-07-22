@@ -96,6 +96,24 @@ const listingSchema = new mongoose.Schema({
 
     },
 
+    pickupDuration: {
+
+        type: String,
+
+        required: false,
+
+        default: "Flexible",
+
+    },
+
+    expiryDuration: {
+
+        type: Number,
+
+        default: 720,
+
+    },
+
     expiresAt: {
 
         type: Date,
