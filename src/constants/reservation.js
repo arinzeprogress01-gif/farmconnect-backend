@@ -1,0 +1,1 @@
+export const RESERVATION_EXPIRY_MINUTES = 60;

@@ -49,7 +49,6 @@ export const createNewListing = async (
 
     }
 
-
     const user = await findUserById(userId);
 
     if (!user) {

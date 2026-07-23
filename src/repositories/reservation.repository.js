@@ -1,4 +1,5 @@
 import Reservation from "../models/reservation.model.js";
+import { RESERVATION_EXPIRY_MINUTES } from "../constants/reservation.js";
 
 export const createReservation = async (reservationData) => {
 
@@ -26,6 +27,8 @@ export const findReservationByReservationId = async (reservationId) => {
 
 };
 
+import { RESERVATION_EXPIRY_MINUTES } from "../constants/reservation.js";
+
 export const findExpiredReservations = async () => {
 
     return Reservation.find({
@@ -38,7 +41,7 @@ export const findExpiredReservations = async () => {
 
                 Date.now() -
 
-                15 * 60 * 1000
+                RESERVATION_EXPIRY_MINUTES * 60 * 1000
 
             ),
 
