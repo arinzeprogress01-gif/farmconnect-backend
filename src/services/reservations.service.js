@@ -405,23 +405,15 @@ export const cancelReservation = async (
 
     await updateReservation(reservation);
 
-    console.log("User ID passed:", userId);
+    const user = await findUserById(reservation.user);
 
-    const user = await findUserById(userId);
+    if (!user) {
+        throw new NotFoundError("User not found.");
+    }
 
-    console.log("Found User:", user);
-
-    user.reservationBlockedUntil =
-
-        new Date(
-
-            Date.now()
-
-            +
-
-            (60 * 60 * 1000)
-
-        );
+    user.reservationBlockedUntil = new Date(
+        Date.now() + (60 * 60 * 1000)
+    );
 
     await user.save();
 
