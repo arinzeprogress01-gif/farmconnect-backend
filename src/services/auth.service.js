@@ -313,16 +313,10 @@ export const forgotPassword = async (
                 `Your password reset code is ${otp}. It expires in 5 minutes.`,
 
             data: {
-
-                type:
-
-                    "PASSWORD_RESET",
-
-                email:
-
-                    user.email,
-
-            },
+            type: "PASSWORD_RESET",
+            email: user.email,
+            otp: otp.toString()
+        }
 
         });
 
