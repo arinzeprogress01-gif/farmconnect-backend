@@ -411,11 +411,20 @@ export const cancelReservation = async (
         throw new NotFoundError("User not found.");
     }
 
+    console.log("Before:", user.reservationBlockedUntil);
+
     user.reservationBlockedUntil = new Date(
         Date.now() + (60 * 60 * 1000)
     );
 
+    console.log("Modified?", user.isModified("reservationBlockedUntil"));
+    console.log("After Assignment:", user.reservationBlockedUntil);
+
     await user.save();
+
+    const updatedUser = await findUserById(reservation.user);
+
+    console.log("After Save:", updatedUser.reservationBlockedUntil);
 
     console.log(
         "Saved blockedUntil:",
