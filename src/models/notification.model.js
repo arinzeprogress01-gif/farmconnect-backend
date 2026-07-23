@@ -67,6 +67,8 @@ const notificationSchema = new mongoose.Schema({
             "reminder",
 
             "promotion",
+            
+            "security",
 
         ],
 
