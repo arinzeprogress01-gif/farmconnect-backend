@@ -405,7 +405,11 @@ export const cancelReservation = async (
 
     await updateReservation(reservation);
 
+    console.log("User ID passed:", userId);
+
     const user = await findUserById(userId);
+
+    console.log("Found User:", user);
 
     user.reservationBlockedUntil =
 
@@ -420,6 +424,11 @@ export const cancelReservation = async (
         );
 
     await user.save();
+
+    console.log(
+        "Saved blockedUntil:",
+        user.reservationBlockedUntil
+    );
 
     /*
 
