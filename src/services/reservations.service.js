@@ -9,6 +9,8 @@ import {
 
 } from "../repositories/reservation.repository.js";
 
+import { findUserById } from "../repositories/user.repository.js";
+
 import reservationSchema from "../validators/reservation.validator.js";
 
 import {
