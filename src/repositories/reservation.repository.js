@@ -118,8 +118,8 @@ export const cancelReservationByUser = async (
 
         {
 
-            new: true,
-
+            returnDocument: "after",
+            
         }
 
     );

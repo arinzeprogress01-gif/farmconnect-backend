@@ -44,7 +44,7 @@ export const updateAppUserProfile = async (
 
         {
 
-            new: true,
+            returnDocument: "after",
 
             runValidators: true,
 

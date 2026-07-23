@@ -261,7 +261,7 @@ export const updateListing = async (
 
         {
 
-            new: true,
+            returnDocument: "after",
 
             runValidators: true,
 

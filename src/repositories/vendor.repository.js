@@ -27,7 +27,7 @@ export const updateVendors = async (id, data) => {
         data,
 
         {
-            new: true,
+            returnDocument: "after",
             runValidators: true,
         }
 
@@ -53,7 +53,7 @@ export const updateVendorProfile = async (
         data,
 
         {
-            new: true,
+            returnDocument: "after",
             runValidators: true,
         }
 
