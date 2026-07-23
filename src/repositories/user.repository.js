@@ -18,8 +18,8 @@ export const findUserByEmail = async (
     return await query;
 };
 
-export const findUserById = async (id) => {
-    return await User.findById(id);
+export const findUserById = async (userId) => {
+    return User.findById(userId);
 };
 
 export const findUserByEmailWithPassword = async (
