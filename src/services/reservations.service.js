@@ -405,24 +405,6 @@ export const cancelReservation = async (
 
     await updateReservation(reservation);
 
-    await User.findByIdAndUpdate(
-        reservation.user,
-        {
-            reservationBlockedUntil: new Date(
-                Date.now() + (60 * 60 * 1000)
-            ),
-        },
-        {
-            returnDocument: "after",
-        }
-    );
-
-    const updatedUser = await User.findById(reservation.user);
-
-    console.log(
-        "Blocked Until:",
-        updatedUser.reservationBlockedUntil
-    );
 
     /*
 
@@ -667,6 +649,18 @@ export const cancelUserReservation = async (
             }
 
         );
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+        throw new NotFoundError("User not found.");
+    }
+
+    user.reservationBlockedUntil = new Date(
+        Date.now() + (60 * 60 * 1000)
+    );
+
+    await user.save();
 
     // Vendor notification
 
