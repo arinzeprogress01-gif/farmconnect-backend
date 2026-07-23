@@ -122,8 +122,8 @@ export const createNewListing = async (
     };
 
     const expiryDuration =
-
-        data.expiryDuration || 720;
+        
+        value.expiryDuration ?? 720;
 
     const expiresAt = new Date(
 
@@ -153,6 +153,7 @@ export const createNewListing = async (
             quantity: value.quantity,
 
             pickupLocation,
+            pickupDuration: value.pickupDuration,
 
             imageUrls: value.imageUrls,
 
