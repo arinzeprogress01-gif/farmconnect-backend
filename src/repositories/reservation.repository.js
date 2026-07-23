@@ -27,7 +27,6 @@ export const findReservationByReservationId = async (reservationId) => {
 
 };
 
-import { RESERVATION_EXPIRY_MINUTES } from "../constants/reservation.js";
 
 export const findExpiredReservations = async () => {
 
