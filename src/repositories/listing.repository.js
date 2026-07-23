@@ -61,6 +61,7 @@ export const getVendorListings = async (
 
 };
 
+
 export const getMarketListings = async (filters = {}) => {
 
     const {
@@ -70,6 +71,10 @@ export const getMarketListings = async (filters = {}) => {
         location,
 
         search,
+
+        vendor,
+
+        isFree,
 
     } = filters;
 
@@ -81,6 +86,7 @@ export const getMarketListings = async (filters = {}) => {
 
     };
 
+    // Category Filter
     if (category) {
 
         query.category = {
@@ -91,6 +97,7 @@ export const getMarketListings = async (filters = {}) => {
 
     }
 
+    // Pickup Location Filter
     if (location) {
 
         query.pickupLocation = {
@@ -101,17 +108,90 @@ export const getMarketListings = async (filters = {}) => {
 
     }
 
+    // Free / Paid Filter
+    if (typeof isFree !== "undefined") {
+
+        query.isFree =
+
+            isFree === "true";
+
+    }
+
+    // General Search
     if (search) {
 
-        query.foodName = {
+        query.$or = [
 
-            $regex: new RegExp(search, "i"),
+            {
+
+                foodName: {
+
+                    $regex: new RegExp(search, "i"),
+
+                },
+
+            },
+
+            {
+
+                description: {
+
+                    $regex: new RegExp(search, "i"),
+
+                },
+
+            },
+
+            {
+
+                category: {
+
+                    $regex: new RegExp(search, "i"),
+
+                },
+
+            },
+
+            {
+
+                pickupLocation: {
+
+                    $regex: new RegExp(search, "i"),
+
+                },
+
+            },
+
+        ];
+
+    }
+
+    // Vendor Search
+    if (vendor) {
+
+        const vendors = await VendorProfile.find({
+
+            businessName: {
+
+                $regex: new RegExp(vendor, "i"),
+
+            },
+
+        });
+
+        query.vendorId = {
+
+            $in: vendors.map(
+
+                vendor => vendor._id
+
+            ),
 
         };
 
     }
 
-    return await Listing.find(query)
+    return Listing.find(query)
 
         .populate(
 
