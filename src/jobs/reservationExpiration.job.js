@@ -1,4 +1,5 @@
 import cron from "node-cron";
+import VendorProfile from "../models/vendor.model.js";
 
 import {
     findExpiredReservations,
