@@ -23,7 +23,7 @@ if (existingAdmin) {
 
 }
 
-const password = await hashPassword("Admin@123");
+const password = await hashPassword("Godmylove@1");
 
 await User.create({
 
