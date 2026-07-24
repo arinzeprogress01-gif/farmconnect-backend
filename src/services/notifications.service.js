@@ -35,6 +35,17 @@ export const sendPushNotification = async ({
             body,
 
         },
+        webpush: {
+
+            notification: {
+
+                icon: "/logo192.png",
+
+                badge: "/logo192.png",
+
+            }
+
+        },
 
         data,
 

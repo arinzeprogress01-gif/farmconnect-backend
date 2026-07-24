@@ -170,13 +170,27 @@ const userSchema = new mongoose.Schema(
 
     },
 
-    reservationBlockedUntil: {
+    reservationRestriction: {
 
-      type: Date,
+    listing: {
 
-      default: null,
+        type: mongoose.Schema.Types.ObjectId,
+
+        ref: "Listing",
+
+        default: null,
 
     },
+
+    blockedUntil: {
+
+        type: Date,
+
+        default: null,
+
+    },
+
+},
   },
   {
     timestamps: true,

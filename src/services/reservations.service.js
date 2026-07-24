@@ -73,37 +73,35 @@ export const reserveListing = async (
 
     if (
 
-        user.reservationBlockedUntil &&
+    user.reservationRestriction?.listing &&
 
-        user.reservationBlockedUntil >
+    user.reservationRestriction.listing.toString() === listing._id.toString() &&
 
-        new Date()
+    user.reservationRestriction.blockedUntil > new Date()
 
-    ) {
+) {
 
-        const minutesLeft = Math.ceil(
+    const minutesLeft = Math.ceil(
 
-            (
+        (
 
-                user.reservationBlockedUntil -
+            user.reservationRestriction.blockedUntil -
 
-                new Date()
+            new Date()
 
-            )
+        ) /
 
-            /
+        (60 * 1000)
 
-            (60 * 1000)
+    );
 
-        );
+    throw new BadRequestError(
 
-        throw new BadRequestError(
+        `You recently cancelled this listing. Please wait ${minutesLeft} minute(s) before reserving it again.`
 
-            `You cancelled a reservation recently. Please wait ${minutesLeft} minute(s) before making another reservation.`
+    );
 
-        );
-
-    }
+}
 
     const listing =
         await findListingById(
@@ -656,12 +654,17 @@ export const cancelUserReservation = async (
         throw new NotFoundError("User not found.");
     }
 
-    user.reservationBlockedUntil = new Date(
-        Date.now() + (60 * 60 * 1000)
-    );
+    user.reservationRestriction = {
+
+        listing: reservation.listing,
+
+        blockedUntil: new Date(
+            Date.now() + (60 * 60 * 1000)
+        ),
+
+    };
 
     await user.save();
-
     // Vendor notification
 
     await sendNotification({

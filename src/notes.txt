@@ -3282,3 +3282,132 @@ router.patch(
 
 export default router;
 
+export const resetPassword = async (
+
+body
+
+) => {
+
+const { error, value } =
+
+    resetPasswordSchema.validate(body);
+
+if (error) {
+
+    throw new BadRequestError(
+
+        error.details[0].message
+
+    );
+
+}
+
+const {
+
+    email,
+
+    newPassword,
+
+} = value;
+
+const user =
+
+    await findUserByEmail(
+
+        email,
+
+        true
+
+    );
+
+if (!user) {
+
+    throw new UnauthorizedError(
+
+        "Invalid request."
+
+    );
+
+}
+
+if (
+
+    !user.passwordReset.verified
+
+) {
+
+    throw new UnauthorizedError(
+
+        "OTP verification is required."
+
+    );
+
+}
+
+const hashedPassword =
+
+    await bcrypt.hash(
+
+        newPassword,
+
+        10
+
+    );
+
+await updatePassword(
+
+    user,
+
+    hashedPassword
+
+);
+
+await clearPasswordReset(
+
+    user
+
+);
+
+await sendNotification({
+
+    receiver: user._id,
+
+    title: "Password Changed",
+
+    message:
+        "Your password has been changed successfully.",
+
+    type: "security",
+
+    priority: "high",
+
+    data: {
+
+        action: "OPEN_PROFILE",
+
+    },
+
+});
+
+return {
+
+    message:
+
+        "Password reset successfully.",
+
+};
+
+}; i said, email is no longer needed in final reset, just ur newPassword and confirm new password
+
+so we simple need beautified way of displaying it right.. so, instead of just sliding down like an alert, it come like a normal notification and when the app is not open in ur phone, it will come like on ur notification bars ,just like app notifications do.. what do we adjust.. lemme send files.. this is the firebaseMessaging.js code line at the buttom..
+
+export function listenForForegroundNotifications() {
+onMessage(messaging, (payload) => {
+console.log('Foreground Notification:', payload);
+
+```
+alert(`${payload.notification.title}\n\n${payload.notification.body}`);
+```
+
+});
+} is this the only stuff we need to change for it or there more

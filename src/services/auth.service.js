@@ -511,9 +511,9 @@ export const verifyOtp = async (
 
     return {
 
-        message:
+        message: "OTP verified successfully.",
 
-            "OTP verified successfully.",
+        email: user.email,
 
     };
 
@@ -541,21 +541,24 @@ export const resetPassword = async (
 
     const {
 
-        email,
-
         newPassword,
 
     } = value;
 
-    const user =
+    const email = body.email;
 
-        await findUserByEmail(
+    if (!email) {
 
-            email,
-
-            true
-
+        throw new UnauthorizedError(
+            "Reset session expired."
         );
+
+    }
+
+    const user = await findUserByEmail(
+        email,
+        true
+    );
 
     if (!user) {
 
