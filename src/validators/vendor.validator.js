@@ -16,14 +16,6 @@ const vendorProfileSchema = Joi.object({
         .allow("")
         .optional(),
 
-    email: Joi.string()
-        .email()
-        .required(),
-
-    phone: Joi.string()
-        .trim()
-        .required(),
-
     permanentAddress: Joi.string()
         .trim()
         .required(),

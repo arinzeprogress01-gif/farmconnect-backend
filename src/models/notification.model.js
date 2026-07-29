@@ -38,6 +38,8 @@ const notificationSchema = new mongoose.Schema({
 
         enum: [
 
+            "vendor",
+
             "listing",
 
             "listing_created",
