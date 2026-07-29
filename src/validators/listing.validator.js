@@ -101,14 +101,13 @@ const listingSchema = Joi.object({
         .default(720),
 
     imageUrls: Joi.array()
-
-        .items(
-
-            Joi.string().uri()
-
-        )
-
-        .default([]),
+        .items(Joi.string().uri())
+        .min(1)
+        .required()
+        .messages({
+            "array.min": "At least one food image is required.",
+            "any.required": "Food image is required."
+        }),
 
     isHealthy: Joi.boolean()
 

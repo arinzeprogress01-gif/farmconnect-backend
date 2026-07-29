@@ -6,7 +6,13 @@ const appUserProfileSchema = Joi.object({
 
     phone: Joi.string().trim().required(),
 
-    profileImage: Joi.string().allow("").optional(),
+    profileImage: Joi.string()
+        .uri()
+        .required()
+        .messages({
+            "string.uri": "Please upload a valid profile image.",
+            "any.required": "Vendor profile image is required."
+        }),
 
     gender: Joi.string()
 

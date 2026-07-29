@@ -33,8 +33,12 @@ const vendorProfileSchema = Joi.object({
         .required(),
 
     profileImage: Joi.string()
-        .allow("")
-        .optional(),
+        .uri()
+        .required()
+        .messages({
+            "string.uri": "Please upload a valid profile image.",
+            "any.required": "Vendor profile image is required."
+        }),
 
     operatingHours: Joi.string()
         .allow("")
