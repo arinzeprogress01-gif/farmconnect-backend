@@ -8,13 +8,23 @@ export const createVendor = async (data) => {
 
 export const findVendorByUserId = async (userId) => {
 
-    return await VendorProfile.findOne({ userId });
+    return await VendorProfile
+        .findOne({ userId })
+        .populate(
+            "userId",
+            "fullName email phone"
+        );
 
 };
 
 export const findVendorById = async (id) => {
 
-    return await VendorProfile.findById(id);
+    return await VendorProfile
+        .findById(id)
+        .populate(
+            "userId",
+            "fullName email phone"
+        );
 
 };
 
@@ -35,9 +45,15 @@ export const updateVendors = async (id, data) => {
 
 };
 
+
 export const getVendorByUserId = async (userId) => {
 
-    return await VendorProfile.findOne({ userId });
+    return await VendorProfile
+        .findOne({ userId })
+        .populate(
+            "userId",
+            "fullName email phone"
+        );
 
 };
 

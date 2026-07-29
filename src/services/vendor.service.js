@@ -68,6 +68,10 @@ export const createVendorProfile = async (
 
         ...value,
 
+        email: user.email,
+
+        phone: user.phone,
+
     });
 
     // 6. Mark profile completed
