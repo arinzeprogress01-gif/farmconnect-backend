@@ -5,7 +5,8 @@ import authenticate from "../middleware/auth.middleware.js";
 import {
     registerUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    getCurrentUser
 } from "../controllers/auth.controller.js";
 
 import {
