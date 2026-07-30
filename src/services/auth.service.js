@@ -9,7 +9,7 @@ import {
 
 
 import { findUserById } from "../repositories/user.repository.js";
-import { NotFoundError } from "../errors/NotFoundError.js";
+import  NotFoundError  from "../errors/NotFoundError.js";
 
 import {
 
