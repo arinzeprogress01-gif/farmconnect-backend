@@ -7,6 +7,10 @@ import {
     findUserByEmail,
 } from "../repositories/user.repository.js";
 
+
+import { findUserById } from "../repositories/user.repository.js";
+import { NotFoundError } from "../errors/NotFoundError.js";
+
 import {
 
     updatePasswordReset,
@@ -637,6 +641,18 @@ export const resetPassword = async (
 
     };
 
+};
+
+
+export const getCurrentUserService = async (userId) => {
+
+    const user = await findUserById(userId);
+
+    if (!user) {
+        throw new NotFoundError("User not found.");
+    }
+
+    return user;
 };
 
 
