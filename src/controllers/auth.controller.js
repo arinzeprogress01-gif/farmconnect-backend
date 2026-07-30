@@ -52,7 +52,7 @@ export const loginUser = async (req, res, next) => {
 
 export const getCurrentUser = async (req, res) => {
 
-    const user = await authService.getCurrentUserService(req.user.userId);
+    const user = await authService.getCurrentUserService(req.user._id);
 
     res.status(200).json({
         success: true,
