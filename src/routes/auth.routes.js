@@ -42,6 +42,11 @@ router.post(
     loginUser
 );
 
+router.get(
+    "/me",
+    authenticate,
+    getCurrentUser
+);
 
 router.post(
 
