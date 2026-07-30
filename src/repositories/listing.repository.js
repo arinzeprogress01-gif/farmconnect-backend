@@ -46,18 +46,49 @@ export const findVendorByUserId = async (
 };
 
 export const getVendorListings = async (
-    vendorId
+    vendorId,
+    search = ""
 ) => {
 
-    return await Listing.find({
-
+    const query = {
         vendorId,
+    };
 
-    }).sort({
+    if (search) {
 
-        createdAt: -1,
+        query.$or = [
 
-    });
+            {
+                foodName: {
+                    $regex: new RegExp(search, "i"),
+                },
+            },
+
+            {
+                description: {
+                    $regex: new RegExp(search, "i"),
+                },
+            },
+
+            {
+                category: {
+                    $regex: new RegExp(search, "i"),
+                },
+            },
+
+            {
+                pickupLocation: {
+                    $regex: new RegExp(search, "i"),
+                },
+            },
+
+        ];
+    }
+
+    return await Listing.find(query)
+        .sort({
+            createdAt: -1,
+        });
 
 };
 

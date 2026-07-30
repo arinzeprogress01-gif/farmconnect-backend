@@ -198,7 +198,9 @@ export const createNewListing = async (
 
 export const getMyListings = async (
 
-    userId
+    userId,
+
+    search
 
 ) => {
 
@@ -220,7 +222,9 @@ export const getMyListings = async (
 
     return await getVendorListings(
 
-        vendor._id
+        vendor._id,
+
+        search
 
     );
 

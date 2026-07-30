@@ -55,11 +55,9 @@ export const getMyListings = async (
     try {
 
         const listings =
-
             await listingService.getMyListings(
-
-                req.user._id
-
+                req.user._id,
+                req.query.search
             );
 
         return res.status(200).json({
