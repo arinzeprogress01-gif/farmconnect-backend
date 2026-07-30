@@ -19,7 +19,7 @@ export const findUserByEmail = async (
 };
 
 export const findUserById = async (userId) => {
-    return User.findById(userId);
+    return await User.findById(userId).select("-password");
 };
 
 export const findUserByEmailWithPassword = async (
