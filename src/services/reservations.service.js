@@ -715,33 +715,46 @@ export const cancelUserReservation = async (
 
 };
 
-export const getTheVendorReservations = async (
+export const getTheVendorReservations = async (vendorId) => {
 
-    vendorId
-
-) => {
-
-    return Reservation.find({
-
+    const reservations = await Reservation.find({
         vendor: vendorId,
-
     })
-
         .populate("user", "fullName email phone")
-
         .populate(
-
             "listing",
-
-            "foodName pickupLocation"
-
+            "foodName pickupLocation expiresAt"
         )
-
         .sort({
-
             createdAt: -1,
-
         });
+
+    return reservations.map((reservation) => {
+
+        let timeRemaining = "Expired";
+
+        if (
+            reservation.status !== "expired" &&
+            reservation.listing?.expiresAt
+        ) {
+            const diff =
+                new Date(reservation.listing.expiresAt) - new Date();
+
+            if (diff > 0) {
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor(
+                    (diff % (1000 * 60 * 60)) / (1000 * 60)
+                );
+
+                timeRemaining = `${hours}h ${minutes}m`;
+            }
+        }
+
+        return {
+            ...reservation.toObject(),
+            timeRemaining,
+        };
+    });
 
 };
 
