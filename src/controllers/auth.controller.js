@@ -50,6 +50,17 @@ export const loginUser = async (req, res, next) => {
 
 };
 
+export const getCurrentUser = async (req, res) => {
+
+    const user = await authService.getCurrentUserService(req.user.userId);
+
+    res.status(200).json({
+        success: true,
+        message: "Current user fetched successfully.",
+        data: user,
+    });
+
+};
 
 export const logoutUser = async (
     req,
