@@ -9,7 +9,9 @@ export const validate = (schema) => {
         if (error) {
             return res.status(400).json({
                 success: false,
-                message: "Validation failed.",
+                message: error.details
+                    .map((err) => err.message)
+                    .join("\n"),
                 errors: error.details.map((err) => ({
                     field: err.path.join("."),
                     message: err.message,
