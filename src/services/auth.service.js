@@ -87,6 +87,10 @@ export const register = async (payload) => {
         throw new BadRequestError("Email is required");
     };
 
+    if (!password) {
+        throw new ConflictError("Password must contain at least 8 characters with uppercase, lowercase and number");
+    };
+
     if(password != confirmPassword) {
         throw new ConflictError("Passwords do not match.");
     }
