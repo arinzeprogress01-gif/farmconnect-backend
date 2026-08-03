@@ -87,8 +87,8 @@ export const createUserProfile = async (
 
     const profile = await createAppUserProfile({
         userId,
-        //fullName: user.fullName,
-        //phone: user.phone,
+        fullName: user.fullName,
+        phone: user.phone,
         ...value,
     });
 
