@@ -12,6 +12,7 @@ import {
     marketList,
     getListingsByCategory,
     getFoodCategories,
+    getNearbyListings,
     
 } from "../controllers/listing.controller.js";
 
@@ -47,6 +48,12 @@ router.get(
 
     marketList
 
+);
+
+router.get(
+    "/nearby",
+    authenticate,
+    getNearbyListings
 );
 
 router.get(

@@ -20,6 +20,7 @@ import {
     getMarketListings,
     findListingsByCategory,
     getMarketListings as getMarketListingsRepo,
+    findNearbyListings,
 } from "../repositories/listing.repository.js";
 
 import BadRequestError from "../errors/BadRequestError.js";
@@ -261,6 +262,17 @@ export const getMarketLists = async (query) => {
 
     return await getMarketListingsRepo(query);
 
+};
+
+export const getNearbyListingsService = async (userId) => {
+
+    const listings = await findNearbyListings(userId);
+
+    if (listings === null) {
+        throw new NotFoundError("User profile not found.");
+    }
+
+    return listings;
 };
 
 export const updateMyListing = async (

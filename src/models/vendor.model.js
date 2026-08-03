@@ -34,6 +34,18 @@ const vendorProfileSchema = new mongoose.Schema(
       trim: true,
     },
 
+    state: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    city: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
     phone: {
       type: String,
       required: true,

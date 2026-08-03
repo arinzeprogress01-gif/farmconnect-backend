@@ -1,6 +1,7 @@
 import Listing from "../models/listing.model.js";
 import VendorProfile from "../models/vendor.model.js";
 import User from "../models/user.models.js"
+import { findAppUserByUserId } from "./appUser.repository.js";
 
 export const createListing = async (data) => {
 
@@ -270,6 +271,30 @@ export const findListingsByCategory = async (category) => {
 
         });
 
+};
+
+
+
+export const findNearbyListings = async (userId) => {
+
+    const userProfile = await findAppUserByUserId(userId);
+
+    if (!userProfile) {
+        return null;
+    }
+
+    const vendors = await VendorProfile.find({
+        city: userProfile.city,
+        state: userProfile.state,
+    });
+
+    const vendorIds = vendors.map(v => v.userId);
+
+    return await Listing.find({
+        vendor: {
+            $in: vendorIds,
+        },
+    });
 };
 
 export const updateListing = async (

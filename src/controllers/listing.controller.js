@@ -246,6 +246,7 @@ export const getListingsByCategory = async (
 
     }
 
+
 };
 
 export const getFoodCategories = async (
@@ -282,4 +283,18 @@ export const getFoodCategories = async (
 
     }
 
+};
+
+export const getNearbyListings = async (req, res) => {
+
+    const listings =
+        await listingService.getNearbyListingsService(
+            req.user.userId
+        );
+
+    res.status(200).json({
+        success: true,
+        message: "Nearby listings fetched successfully.",
+        data: listings,
+    });
 };

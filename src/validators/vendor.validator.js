@@ -31,6 +31,14 @@ const vendorProfileSchema = Joi.object({
     currentLocation: Joi.string()
         .trim()
         .required(),
+    
+    state: Joi.string()
+        .trim()
+        .required(),
+
+    city: Joi.string()
+        .trim()
+        .required(),
 
     profileImage: Joi.string()
         .uri()
