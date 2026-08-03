@@ -3,6 +3,8 @@ import  sendNotification  from "../utils/sendNotification.js";
 
 import User from "../models/user.models.js";
 
+import { findUserById } from "../repositories/user.repository.js";
+
 import {
     createAppUserProfile,
     findAppUserByUserId,
@@ -43,7 +45,7 @@ export const createUserProfile = async (
 
     }
 
-    const user = await User.findById(userId);
+    const user = await findUserById(userId);
 
     if (!user) {
 
@@ -83,15 +85,12 @@ export const createUserProfile = async (
 
     }
 
-    const profile =
-
-        await createAppUserProfile({
-
-            userId,
-
-            ...value,
-
-        });
+    const profile = await createAppUserProfile({
+        userId,
+        fullName: user.fullName,
+        phone: user.phone,
+        ...value,
+    });
 
     user.profileCompleted = true;
 
