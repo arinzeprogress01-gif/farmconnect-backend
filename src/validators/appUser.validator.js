@@ -2,9 +2,9 @@ import Joi from "joi";
 
 const appUserProfileSchema = Joi.object({
 
-    fullName: Joi.string().trim().required(),
+    //fullName: Joi.string().trim().required(),
 
-    phone: Joi.string().trim().required(),
+    //phone: Joi.string().trim().required(),
 
     profileImage: Joi.string()
         .uri()
