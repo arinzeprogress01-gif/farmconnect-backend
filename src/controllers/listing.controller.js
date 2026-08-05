@@ -287,6 +287,8 @@ export const getFoodCategories = async (
 
 export const getNearbyListings = async (req, res) => {
 
+    console.log("REQ.USER : ", req.user);
+
     const listings =
         await listingService.getNearbyListingsService(
             req.user.userId
