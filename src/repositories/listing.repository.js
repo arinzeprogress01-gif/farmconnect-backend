@@ -152,13 +152,27 @@ export const getMarketListings = async (filters = {}) => {
     // General Search
     if (search) {
 
+        const vendors = await VendorProfile.find({
+
+            businessName: {
+
+                $regex: search,
+
+                $options: "i",
+
+            },
+
+        });
+
         query.$or = [
 
             {
 
                 foodName: {
 
-                    $regex: new RegExp(search, "i"),
+                    $regex: search,
+
+                    $options: "i",
 
                 },
 
@@ -168,7 +182,9 @@ export const getMarketListings = async (filters = {}) => {
 
                 description: {
 
-                    $regex: new RegExp(search, "i"),
+                    $regex: search,
+
+                    $options: "i",
 
                 },
 
@@ -178,7 +194,9 @@ export const getMarketListings = async (filters = {}) => {
 
                 category: {
 
-                    $regex: new RegExp(search, "i"),
+                    $regex: search,
+
+                    $options: "i",
 
                 },
 
@@ -188,38 +206,25 @@ export const getMarketListings = async (filters = {}) => {
 
                 pickupLocation: {
 
-                    $regex: new RegExp(search, "i"),
+                    $regex: search,
+
+                    $options: "i",
+
+                },
+
+            },
+
+            {
+
+                vendorId: {
+
+                    $in: vendors.map(v => v._id),
 
                 },
 
             },
 
         ];
-
-    }
-
-    // Vendor Search
-    if (vendor) {
-
-        const vendors = await VendorProfile.find({
-
-            businessName: {
-
-                $regex: new RegExp(vendor, "i"),
-
-            },
-
-        });
-
-        query.vendorId = {
-
-            $in: vendors.map(
-
-                vendor => vendor._id
-
-            ),
-
-        };
 
     }
 

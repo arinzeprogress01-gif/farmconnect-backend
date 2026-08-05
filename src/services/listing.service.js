@@ -193,8 +193,14 @@ export const createNewListing = async (
 
     });
 
-    return listing;
+    const listingObject = listing.toObject();
 
+    listingObject.minutesLeft = Math.max(
+        0,
+        Math.ceil((listing.expiresAt - new Date()) / (1000 * 60))
+    );
+
+    return listingObject;
 };
 
 export const getMyListings = async (
