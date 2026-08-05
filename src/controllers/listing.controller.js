@@ -291,7 +291,7 @@ export const getNearbyListings = async (req, res) => {
 
     const listings =
         await listingService.getNearbyListingsService(
-            req.user.userId
+            req.user._id
         );
 
     res.status(200).json({
