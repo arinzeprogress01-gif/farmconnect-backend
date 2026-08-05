@@ -16,11 +16,17 @@ export const findAppUserByUserId = async (
 
 ) => {
 
-    return await AppUserProfile.findOne({
+    console.log("searching", userId)
+
+    const profile = await AppUserProfile.findOne({
 
         userId,
 
     });
+
+    console.log("found", profile)
+
+    return profile
 
 };
 

@@ -282,7 +282,10 @@ export const findListingsByCategory = async (category) => {
 
 export const findNearbyListings = async (userId) => {
 
+    console.log("searching AppUserProfile with:" , userId)
+
     const userProfile = await findAppUserByUserId(userId);
+    console.log("Found AppUserProfile :", userProfile)
 
     if (!userProfile) {
         return null;
