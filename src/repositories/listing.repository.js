@@ -293,13 +293,18 @@ export const findNearbyListings = async (userId) => {
         state: userProfile.state,
     });
 
-    const vendorIds = vendors.map(v => v.userId);
+    const vendorIds = vendors.map(v => v._id);
 
     return await Listing.find({
-        vendor: {
+        vendorId: {
             $in: vendorIds,
         },
-    });
+        status: "available",
+        isActive: true,
+    }).populate(
+        "vendorId",
+        "businessName currentLocation profileImage"
+    );
 };
 
 export const updateListing = async (
