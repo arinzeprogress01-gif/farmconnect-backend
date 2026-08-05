@@ -26,6 +26,7 @@ import {
 import BadRequestError from "../errors/BadRequestError.js";
 import ForbiddenError from "../errors/ForbiddenError.js";
 import { AppError } from "../errors/app.error.js";
+import NotFoundError from "../errors/NotFoundError.js";
 
 export const createNewListing = async (
 
