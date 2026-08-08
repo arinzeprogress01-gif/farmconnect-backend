@@ -63,15 +63,19 @@ export const createVendorProfile = async (
 
     // 5. Create vendor profile
     const vendor = await createVendor({
-
         userId,
-
         ...value,
 
+        location: {
+            type: "Point",
+            coordinates: [
+                value.longitude,
+                value.latitude,
+            ],
+        },
+
         email: user.email,
-
         phone: user.phone,
-
     });
 
     // 6. Mark profile completed

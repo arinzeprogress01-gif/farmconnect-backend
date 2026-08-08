@@ -85,7 +85,8 @@ const vendorProfileSchema = new mongoose.Schema(
           enum: ["Point"],
           },
           coordinates: {
-              type: [Number],
+            type: [Number],
+            required: true,
           },
       },
   },
