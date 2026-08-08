@@ -164,17 +164,14 @@ const listingSchema = new mongoose.Schema({
         default: true,
     },
     location: {
-        type: {
-            type: String,
-            enum: ["Point"],
-            default: "Point",
-        },
-
-        coordinates: {
-            type: [Number],
-            default: undefined,
-        },
+    type: {
+        type: String,
+        enum: ["Point"],
     },
+    coordinates: {
+        type: [Number],
+    },
+},
 
 }, {
 
