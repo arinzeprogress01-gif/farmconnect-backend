@@ -285,18 +285,42 @@ export const getFoodCategories = async (
 
 };
 
-export const getNearbyListings = async (req, res) => {
+export const getNearbyListings = async (req, res, next) => {
 
-    console.log("REQ.USER : ", req.user);
+    try {
 
-    const listings =
-        await listingService.getNearbyListingsService(
-            req.user._id
-        );
+        console.log("REQ.USER : ", req.user);
 
-    res.status(200).json({
-        success: true,
-        message: "Nearby listings fetched successfully.",
-        data: listings,
-    });
+        const {
+            longitude,
+            latitude,
+            maxDistance,
+        } = req.query;
+
+        const listings =
+            await listingService.getNearbyListingsService(
+                req.user._id,
+                longitude,
+                latitude,
+                maxDistance
+                    ? Number(maxDistance)
+                    : 10000
+            );
+
+        return res.status(200).json({
+
+            success: true,
+
+            message:
+                "Nearby listings fetched successfully.",
+
+            data: listings,
+
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
 };

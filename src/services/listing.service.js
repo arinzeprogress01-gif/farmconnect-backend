@@ -4,6 +4,11 @@ import  sendNotification  from "../utils/sendNotification.js";
 
 import { FOOD_CATEGORIES } from "../constants/foodCategories.js";
 
+import {
+    isValidCoordinates,
+    createGeoPoint,
+} from "../utils/geolocation.js";
+
 import User from "../models/user.models.js";
 
 import VendorProfile from "../models/vendor.model.js";
@@ -21,6 +26,7 @@ import {
     findListingsByCategory,
     getMarketListings as getMarketListingsRepo,
     findNearbyListings,
+    findNearbyListingsByCoordinates,
 } from "../repositories/listing.repository.js";
 
 import BadRequestError from "../errors/BadRequestError.js";
@@ -100,20 +106,36 @@ export const createNewListing = async (
 
 
     let pickupLocation;
+    let location;
 
     if (value.useVendorLocation) {
 
-        pickupLocation =
+        pickupLocation = vendor.currentLocation;
 
-            vendor.currentLocation;
+        // Vendor's saved coordinates become
+        // the listing's geographic location.
+        location = vendor.location;
 
     } else {
 
-        pickupLocation =
+        pickupLocation = value.pickupLocation;
 
-            value.pickupLocation;
+        if (
+            !isValidCoordinates(
+                value.longitude,
+                value.latitude
+            )
+        ) {
+            throw new BadRequestError(
+                "Invalid pickup coordinates."
+            );
+        }
 
-    };
+        location = createGeoPoint(
+            value.longitude,
+            value.latitude
+        );
+    }
 
     let price = value.price;
 
@@ -155,6 +177,9 @@ export const createNewListing = async (
             quantity: value.quantity,
 
             pickupLocation,
+
+            location,
+
             pickupDuration: value.pickupDuration,
 
             imageUrls: value.imageUrls,
@@ -271,12 +296,47 @@ export const getMarketLists = async (query) => {
 
 };
 
-export const getNearbyListingsService = async (userId) => {
+export const getNearbyListingsService = async (
+    userId,
+    longitude,
+    latitude,
+    maxDistance = 10000
+) => {
 
-    const listings = await findNearbyListings(userId);
+    // If coordinates are supplied, use real geographic proximity.
+    if (
+        longitude !== undefined &&
+        latitude !== undefined
+    ) {
+
+        if (
+            !isValidCoordinates(
+                longitude,
+                latitude
+            )
+        ) {
+            throw new BadRequestError(
+                "Invalid location coordinates."
+            );
+        }
+
+        return await findNearbyListingsByCoordinates(
+            longitude,
+            latitude,
+            maxDistance
+        );
+    }
+
+    // Existing nearby logic remains untouched.
+    const listings =
+        await findNearbyListings(userId);
 
     if (listings === null) {
-        throw new NotFoundError("User profile not found.");
+
+        throw new NotFoundError(
+            "User profile not found."
+        );
+
     }
 
     return listings;

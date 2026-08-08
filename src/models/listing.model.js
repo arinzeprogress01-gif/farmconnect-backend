@@ -162,12 +162,28 @@ const listingSchema = new mongoose.Schema({
         type: Boolean,
 
         default: true,
-    }
+    },
+    location: {
+        type: {
+            type: String,
+            enum: ["Point"],
+            default: "Point",
+        },
+
+        coordinates: {
+            type: [Number],
+            default: undefined,
+        },
+    },
 
 }, {
 
     timestamps: true,
 
+});
+
+listingSchema.index({
+    location: "2dsphere",
 });
 
 export default mongoose.model(

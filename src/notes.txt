@@ -1,165 +1,56 @@
-import Joi from "joi";
-
-const vendorProfileSchema = Joi.object({
-
-    businessName: Joi.string()
-        .trim()
-        .min(3)
-        .max(100)
-        .required(),
-
-    businessType: Joi.string()
-        .trim()
-        .required(),
-
-    description: Joi.string()
-        .allow("")
-        .optional(),
-
-    email: Joi.string()
-        .email()
-        .required(),
-
-    phone: Joi.string()
-        .trim()
-        .required(),
-
-    permanentAddress: Joi.string()
-        .trim()
-        .required(),
-
-    currentLocation: Joi.string()
-        .trim()
-        .required(),
-
-    profileImage: Joi.string()
-        .allow("")
-        .optional(),
-
-    operatingHours: Joi.string()
-        .allow("")
-        .optional(),
-
-});
-
-export default vendorProfileSchema;
-
-import Joi from "joi";
-import { FOOD_CATEGORIES } from "../constants/foodCategories.js";
-
-const listingSchema = Joi.object({
-
-    foodName: Joi.string()
-
-        .trim()
-
-        .min(2)
-
-        .max(100)
-
-        .required()
-
-        .messages({
-
-            "string.empty":
-                "Food name is required.",
-
-        }),
-
-    category: Joi.string()
-
-        .valid(...FOOD_CATEGORIES)
-
-        .required()
-
-        .messages({
-
-            "any.only":
-                "Please select a valid food category.",
-
-        }),
-    
-    isFree: Joi.boolean()
-
-        .default(false),
-    
-    price: Joi.when("isFree", {
-
-        is: true,
-
-        then: Joi.number().valid(0),
-
-        otherwise: Joi.number().min(1).required(),
-
-    }),
-
-    description: Joi.string()
-
-        .trim()
-
-        .max(500)
-
-        .allow(""),
-
-    quantity: Joi.number()
-
-        .integer()
-
-        .min(1)
-
-        .required()
-
-        .messages({
-
-            "number.base":
-                "Quantity must be a number.",
-
-        }),
-
-    useVendorLocation: Joi.boolean()
-
-        .default(true),
-
-    pickupLocation: Joi.string()
-
-        .trim()
-
-        .when("useVendorLocation", {
-
-            is: false,
-
-            then: Joi.required(),
-
-            otherwise: Joi.optional(),
-
-        }),
-
-    pickupDuration: Joi.string()
-
-        .trim()
-
-        .default("Flexible"),
-
-    expiryDuration: Joi.number()
-        .integer()
-        .min(30)
-        .max(1440)
-        .default(720),
-
-    imageUrls: Joi.array()
-
-        .items(
-
-            Joi.string().uri()
-
-        )
-
-        .default([]),
-
-    isHealthy: Joi.boolean()
-
-        .default(true),
-
-});
-
-export default listingSchema;
+                    FARMCONNECT GEOLOCATION
+                             │
+             ┌───────────────┴────────────────┐
+             │                                │
+       USER LOCATION                    VENDOR LOCATION
+             │                                │
+      Browser Geolocation              Address / Map Picker
+             │                                │
+       latitude + longitude             coordinates
+             │                                │
+             └───────────────┬────────────────┘
+                             ↓
+                       FARMCONNECT API
+                             ↓
+                    MongoDB 2dsphere index
+                             ↓
+                 Nearby listings calculation
+                             ↓
+                    Sorted by actual distance
+                             ↓
+                       React dashboard
+                             │
+                             ↓
+                    Google Maps interface
+
+
+
+
+
+
+                    services
+
+                                         Create Listing
+                           │
+                           ▼
+                     Joi validation
+                           │
+                           ▼
+                useVendorLocation?
+                   /             \
+                 YES              NO
+                  │                │
+                  ▼                ▼
+        vendor.location      latitude + longitude
+                  │                │
+                  │          validate coordinates
+                  │                │
+                  │                ▼
+                  │          createGeoPoint()
+                  │                │
+                  └───────┬────────┘
+                          ▼
+                  Listing.location
+                          │
+                          ▼
+                       MongoDB

@@ -78,11 +78,28 @@ const vendorProfileSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+
+      coordinates: {
+        type: [Number],
+        default: undefined,
+      },
+    },
   },
   {
     timestamps: true,
   }
 );
+
+vendorProfileSchema.index({
+  location: "2dsphere",
+});
 
 export default mongoose.model(
   "VendorProfile",

@@ -310,6 +310,43 @@ export const findNearbyListings = async (userId) => {
     );
 };
 
+export const findNearbyListingsByCoordinates = async (
+    longitude,
+    latitude,
+    maxDistance = 10000
+) => {
+
+    return await Listing.find({
+
+        location: {
+            $near: {
+                $geometry: {
+                    type: "Point",
+                    coordinates: [
+                        Number(longitude),
+                        Number(latitude),
+                    ],
+                },
+
+                $maxDistance: maxDistance,
+            },
+        },
+
+        status: "available",
+        isActive: true,
+
+    })
+
+        .populate(
+            "vendorId",
+            "businessName currentLocation profileImage"
+        )
+
+        .sort({
+            createdAt: -1,
+        });
+};
+
 export const updateListing = async (
 
     listingId,
