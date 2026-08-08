@@ -7,7 +7,7 @@ import { FOOD_CATEGORIES } from "../constants/foodCategories.js";
 import {
     isValidCoordinates,
     createGeoPoint,
-} from "../utils/geolocation.js";
+} from "../utils/geoLocation.js";
 
 import User from "../models/user.models.js";
 
