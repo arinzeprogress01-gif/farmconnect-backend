@@ -48,24 +48,33 @@ const vendorProfileSchema = Joi.object({
             "any.required": "Vendor profile image is required."
         }),
     
-    latitude: Joi.number()
-        .min(-90)
-        .max(90)
-        .required()
-        .messages({
-            "number.base": "Latitude must be a number.",
-            "number.min": "Latitude must be between -90 and 90.",
-            "number.max": "Latitude must be between -90 and 90.",
-        }),
+    location: Joi.object({
+        type: Joi.string()
+            .valid("Point")
+            .required(),
 
-    longitude: Joi.number()
-        .min(-180)
-        .max(180)
+        coordinates: Joi.array()
+            .items(Joi.number())
+            .length(2)
+            .required()
+            .custom((coordinates, helpers) => {
+                const [longitude, latitude] = coordinates;
+
+                if (longitude < -180 || longitude > 180) {
+                    return helpers.error("any.invalid");
+                }
+
+                if (latitude < -90 || latitude > 90) {
+                    return helpers.error("any.invalid");
+                }
+
+                return coordinates;
+            }),
+    })
         .required()
         .messages({
-            "number.base": "Longitude must be a number.",
-            "number.min": "Longitude must be between -180 and 180.",
-            "number.max": "Longitude must be between -180 and 180.",
+            "any.required": "Location is required.",
+            "any.invalid": "Invalid geographic coordinates.",
         }),
 
     operatingHours: Joi.string()

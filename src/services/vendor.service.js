@@ -66,14 +66,6 @@ export const createVendorProfile = async (
         userId,
         ...value,
 
-        location: {
-            type: "Point",
-            coordinates: [
-                value.longitude,
-                value.latitude,
-            ],
-        },
-
         email: user.email,
         phone: user.phone,
     });
