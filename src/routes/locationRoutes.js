@@ -75,193 +75,73 @@ router.get("/reverse", async (req, res) => {
 router.get("/search", async (req, res) => {
     console.log("🔥 LOCATION SEARCH ROUTE HIT");
 
+    console.log("🔥 ABOUT TO READ QUERY");
+
     const {
         street,
         city,
         state,
     } = req.query;
 
-    console.log("📥 Incoming query:", {
+    console.log("🔥 QUERY RECEIVED:", {
         street,
         city,
         state,
     });
 
-    try {
-        if (!street || !city || !state) {
-            console.log("❌ Missing address fields");
+    console.log("🔥 CHECKING REQUIRED FIELDS");
 
-            return res.status(400).json({
-                success: false,
-                message:
-                    "Street, city and state are required.",
-            });
-        }
+    if (!street || !city || !state) {
+        console.log("🔥 REQUIRED FIELDS FAILED");
 
-        const addressQuery = [
-            String(street).trim(),
-            String(city).trim(),
-            String(state).trim(),
-            "Nigeria",
-        ]
-            .filter(Boolean)
-            .join(", ");
-
-        console.log(
-            "🌍 Nominatim query:",
-            addressQuery
-        );
-
-        const params = new URLSearchParams({
-            q: addressQuery,
-            countrycodes: "ng",
-            format: "jsonv2",
-            addressdetails: "1",
-            limit: "1",
-        });
-
-        const controller =
-            new AbortController();
-
-        const timeout = setTimeout(() => {
-            console.log(
-                "⏰ ABORTING NOMINATIM REQUEST"
-            );
-
-            controller.abort();
-        }, 10000);
-
-        console.log(
-            "🚀 Calling Nominatim..."
-        );
-
-        let response;
-
-        try {
-            response = await fetch(
-                `https://nominatim.openstreetmap.org/search?${params.toString()}`,
-                {
-                    method: "GET",
-
-                    headers: {
-                        "User-Agent":
-                            "FarmConnect/1.0 (FarmConnect application)",
-                        Accept:
-                            "application/json",
-                    },
-
-                    signal: controller.signal,
-                }
-            );
-        } catch (fetchError) {
-            console.error(
-                "❌ FETCH TO NOMINATIM FAILED:",
-                fetchError
-            );
-
-            throw fetchError;
-        } finally {
-            clearTimeout(timeout);
-        }
-
-        console.log(
-            "✅ Nominatim responded:",
-            response.status
-        );
-
-        if (!response.ok) {
-            throw new Error(
-                `Nominatim returned HTTP ${response.status}`
-            );
-        }
-
-        const results =
-            await response.json();
-
-        console.log(
-            "📦 Nominatim results:",
-            results
-        );
-
-        if (
-            !Array.isArray(results) ||
-            results.length === 0
-        ) {
-            console.log(
-                "⚠️ No location found"
-            );
-
-            return res.status(404).json({
-                success: false,
-                message:
-                    "Could not find coordinates for this address.",
-            });
-        }
-
-        const location = results[0];
-
-        const latitude =
-            Number(location.lat);
-
-        const longitude =
-            Number(location.lon);
-
-        console.log(
-            "📍 Coordinates:",
-            {
-                latitude,
-                longitude,
-            }
-        );
-
-        if (
-            !Number.isFinite(latitude) ||
-            !Number.isFinite(longitude)
-        ) {
-            throw new Error(
-                "Nominatim returned invalid coordinates."
-            );
-        }
-
-        console.log(
-            "🎯 SENDING RESPONSE TO FRONTEND"
-        );
-
-        return res.status(200).json({
-            success: true,
-
-            data: {
-                latitude,
-                longitude,
-
-                displayName:
-                    location.display_name ||
-                    "",
-            },
-        });
-    } catch (error) {
-        console.error(
-            "💥 LOCATION SEARCH ERROR:",
-            error
-        );
-
-        if (
-            error?.name ===
-            "AbortError"
-        ) {
-            return res.status(504).json({
-                success: false,
-                message:
-                    "Location service timed out. Please try again.",
-            });
-        }
-
-        return res.status(502).json({
+        return res.status(400).json({
             success: false,
             message:
-                "Unable to determine coordinates from the location service.",
+                "Street, city and state are required.",
         });
     }
-});
 
+    console.log("🔥 REQUIRED FIELDS PASSED");
+
+    const addressQuery = [
+        String(street).trim(),
+        String(city).trim(),
+        String(state).trim(),
+        "Nigeria",
+    ].join(", ");
+
+    console.log(
+        "🔥 ADDRESS QUERY CREATED:",
+        addressQuery
+    );
+
+    const params = new URLSearchParams({
+        q: addressQuery,
+        countrycodes: "ng",
+        format: "jsonv2",
+        addressdetails: "1",
+        limit: "1",
+    });
+
+    console.log(
+        "🔥 PARAMS CREATED:",
+        params.toString()
+    );
+
+    console.log(
+        "🔥 ROUTE IS ABOUT TO CALL NOMINATIM"
+    );
+
+    return res.status(200).json({
+        success: true,
+        message: "Route works up to Nominatim.",
+        query: {
+            street,
+            city,
+            state,
+        },
+        nominatimUrl:
+            `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+    });
+});
 export default router;
