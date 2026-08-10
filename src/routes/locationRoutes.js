@@ -77,13 +77,13 @@ router.get("/reverse", async (req, res) => {
  * Address → Coordinates
  */
 router.get("/search", async (req, res) => {
-    try {
-        const {
-            street,
-            city,
-            state,
-        } = req.query;
+    const {
+        street,
+        city,
+        state,
+    } = req.query;
 
+    try {
         if (!street || !city || !state) {
             return res.status(400).json({
                 success: false,
@@ -92,33 +92,79 @@ router.get("/search", async (req, res) => {
             });
         }
 
+        /*
+         * Build one complete address query.
+         *
+         * Example:
+         * Pentecost estate, Abbidi Umuoji, Idemili North, Anambra, Nigeria
+         */
+        const addressQuery = [
+            String(street).trim(),
+            String(city).trim(),
+            String(state).trim(),
+            "Nigeria",
+        ]
+            .filter(Boolean)
+            .join(", ");
+
         const params = new URLSearchParams({
-            street: String(street),
-            city: String(city),
-            state: String(state),
-            country: "Nigeria",
+            q: addressQuery,
             countrycodes: "ng",
             format: "jsonv2",
             addressdetails: "1",
             limit: "1",
         });
 
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?${params.toString()}`,
-            {
-                headers: {
-                    "User-Agent": "FarmConnect/1.0",
-                },
-            }
+        const controller =
+            new AbortController();
+
+        const timeout = setTimeout(() => {
+            controller.abort();
+        }, 10000);
+
+        let response;
+
+        try {
+            console.log(
+                "🌍 Nominatim search:",
+                addressQuery
+            );
+
+            response = await fetch(
+                `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+                {
+                    method: "GET",
+                    headers: {
+                        "User-Agent":
+                            "FarmConnect/1.0 (FarmConnect food-sharing application)",
+                        Accept:
+                            "application/json",
+                    },
+                    signal: controller.signal,
+                }
+            );
+        } finally {
+            clearTimeout(timeout);
+        }
+
+        console.log(
+            "🌍 Nominatim response:",
+            response.status
         );
 
         if (!response.ok) {
-            throw new Error("Geocoding service failed.");
+            throw new Error(
+                `Nominatim geocoding service returned ${response.status}.`
+            );
         }
 
-        const results = await response.json();
+        const results =
+            await response.json();
 
-        if (!results.length) {
+        if (
+            !Array.isArray(results) ||
+            results.length === 0
+        ) {
             return res.status(404).json({
                 success: false,
                 message:
@@ -128,22 +174,67 @@ router.get("/search", async (req, res) => {
 
         const location = results[0];
 
+        const latitude =
+            Number(location.lat);
+
+        const longitude =
+            Number(location.lon);
+
+        if (
+            !Number.isFinite(latitude) ||
+            !Number.isFinite(longitude)
+        ) {
+            return res.status(502).json({
+                success: false,
+                message:
+                    "The geocoding service returned invalid coordinates.",
+            });
+        }
+
+        console.log(
+            "📍 Coordinates found:",
+            {
+                latitude,
+                longitude,
+                displayName:
+                    location.display_name,
+            }
+        );
+
         return res.status(200).json({
             success: true,
             data: {
-                latitude: Number(location.lat),
-                longitude: Number(location.lon),
+                latitude,
+                longitude,
                 displayName:
                     location.display_name || "",
             },
         });
     } catch (error) {
-        console.error("Forward geocoding error:", error);
+        if (
+            error?.name ===
+            "AbortError"
+        ) {
+            console.error(
+                "⏱️ Nominatim request timed out."
+            );
 
-        return res.status(500).json({
+            return res.status(504).json({
+                success: false,
+                message:
+                    "The location service took too long to respond. Please try again.",
+            });
+        }
+
+        console.error(
+            "❌ Forward geocoding error:",
+            error
+        );
+
+        return res.status(502).json({
             success: false,
             message:
-                "Unable to determine coordinates from address.",
+                "Unable to determine coordinates from the location service.",
         });
     }
 });
