@@ -10,86 +10,66 @@ router.get("/search", async (req, res) => {
     console.log("🔥 LOCATION SEARCH ROUTE HIT");
 
     try {
-        const {
-            street,
+        const { city, state } = req.query;
+
+        console.log("🔥 QUERY:", {
             city,
             state,
-        } = req.query;
+        });
 
-        if (!street || !city || !state) {
+        if (!city || !state) {
             return res.status(400).json({
                 success: false,
-                message:
-                    "Street, city and state are required.",
+                message: "City and state are required.",
             });
         }
 
-        const cleanStreet = String(street).trim();
-        const cleanCity = String(city).trim();
-        const cleanState = String(state).trim();
+        const params = new URLSearchParams({
+            q: `${String(city).trim()}, ${String(state).trim()}, Nigeria`,
+            countrycodes: "ng",
+            format: "jsonv2",
+            addressdetails: "1",
+            limit: "1",
+        });
 
-        /*
-         * Try the most specific query first.
-         */
-        const queries = [
-            `${cleanStreet}, ${cleanCity}, ${cleanState}, Nigeria`,
-            `${cleanStreet}, ${cleanState}, Nigeria`,
-            `${cleanCity}, ${cleanState}, Nigeria`,
-        ];
+        console.log(
+            "🔥 NOMINATIM QUERY:",
+            params.toString()
+        );
 
-        let results = [];
-
-        for (const query of queries) {
-            console.log(
-                "🔥 NOMINATIM QUERY:",
-                query
-            );
-
-            const params = new URLSearchParams({
-                q: query,
-                countrycodes: "ng",
-                format: "jsonv2",
-                addressdetails: "1",
-                limit: "1",
-            });
-
-            const response = await fetch(
-                `https://nominatim.openstreetmap.org/search?${params.toString()}`,
-                {
-                    headers: {
-                        "User-Agent":
-                            "FarmConnect/1.0",
-                        Accept:
-                            "application/json",
-                    },
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(
-                    `Nominatim returned ${response.status}`
-                );
+        const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+            {
+                headers: {
+                    "User-Agent": "FarmConnect/1.0",
+                    Accept: "application/json",
+                },
             }
+        );
 
-            const currentResults =
-                await response.json();
+        console.log(
+            "🔥 NOMINATIM STATUS:",
+            response.status
+        );
 
-            console.log(
-                "🔥 RESULTS:",
-                currentResults.length
+        if (!response.ok) {
+            throw new Error(
+                `Nominatim returned ${response.status}`
             );
-
-            if (currentResults.length > 0) {
-                results = currentResults;
-                break;
-            }
         }
+
+        const results = await response.json();
+
+        console.log(
+            "🔥 NOMINATIM RESULTS:",
+            results
+        );
 
         if (!results.length) {
             return res.status(404).json({
                 success: false,
                 message:
-                    "Could not find coordinates for this address.",
+                    "Could not find coordinates for this city and state.",
             });
         }
 
@@ -98,15 +78,10 @@ router.get("/search", async (req, res) => {
         return res.status(200).json({
             success: true,
             data: {
-                latitude: Number(
-                    location.lat
-                ),
-                longitude: Number(
-                    location.lon
-                ),
+                latitude: Number(location.lat),
+                longitude: Number(location.lon),
                 displayName:
-                    location.display_name ||
-                    "",
+                    location.display_name || "",
             },
         });
     } catch (error) {
@@ -118,7 +93,7 @@ router.get("/search", async (req, res) => {
         return res.status(500).json({
             success: false,
             message:
-                "Unable to determine coordinates from address.",
+                "Unable to determine coordinates from location.",
         });
     }
 });
