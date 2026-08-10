@@ -98,3 +98,26 @@
                                │
                                ▼
                     Nearby food listings
+
+
+
+                                        CUSTOM PICKUP
+                         │
+             ┌───────────┴───────────┐
+             │                       │
+        TYPE ADDRESS             CLICK MAP
+             │                       │
+             ▼                       ▼
+getCoordinatesFromLocation()  getLocationFromCoordinates()
+             │                       │
+             ▼                       ▼
+       latitude/longitude       street/city/state
+             │                       │
+             └───────────┬───────────┘
+                         ▼
+                  createListing()
+                         │
+             ┌───────────┴───────────┐
+             ▼                       ▼
+      pickupLocation            latitude
+      street/city/state         longitude
