@@ -8,7 +8,8 @@ import {
     createVendorProfile,
     getVendorProfile,
     updateVendorProfile,
-    deleteVendorProfile
+    deleteVendorProfile,
+    updateVendorCurrentLocation
 } from "../controllers/vendor.controller.js";
 
 const router = express.Router();
@@ -47,6 +48,13 @@ router.patch(
 
     updateVendorProfile
 
+);
+
+router.patch(
+    "/location",
+    authenticate,
+    vendorOnly,
+    updateVendorCurrentLocation
 );
 
 router.delete(

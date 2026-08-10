@@ -54,3 +54,47 @@
                           │
                           ▼
                        MongoDB
+
+
+
+                                           ┌─────────────────────┐
+                    │      VENDOR          │
+                    └──────────┬──────────┘
+                               │
+                    creates food listing
+                               │
+                 ┌─────────────┴─────────────┐
+                 │                           │
+        Use vendor location          Choose custom location
+                 │                           │
+          vendor.location              Map/location picker
+                 │                           │
+                 └─────────────┬─────────────┘
+                               │
+                         Listing.location
+                         GeoJSON Point
+                               │
+                               ▼
+                       MongoDB 2dsphere
+                               │
+                               │
+                    ┌──────────┴──────────┐
+                    │                     │
+                    │     USER            │
+                    │                     │
+                    └──────────┬──────────┘
+                               │
+                       opens dashboard
+                               │
+                     Browser GPS location
+                               │
+                         longitude/latitude
+                               │
+                               ▼
+                     GET /listings/nearby
+                               │
+                               ▼
+                         MongoDB $near
+                               │
+                               ▼
+                    Nearby food listings

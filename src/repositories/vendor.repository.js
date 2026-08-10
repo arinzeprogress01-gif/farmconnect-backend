@@ -77,6 +77,25 @@ export const updateVendorProfile = async (
 
 };
 
+export const updateVendorLocation = async (
+    userId,
+    location
+) => {
+
+    return await VendorProfile.findOneAndUpdate(
+        { userId },
+
+        {
+            location,
+        },
+
+        {
+            returnDocument: "after",
+            runValidators: true,
+        }
+    );
+};
+
 export const deleteVendorProfile = async (
     userId
 ) => {

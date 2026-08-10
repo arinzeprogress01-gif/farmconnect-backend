@@ -112,6 +112,47 @@ export const updateVendorProfile =
 
     };
 
+export const updateVendorCurrentLocation = async (
+    req,
+    res,
+    next
+) => {
+
+    try {
+
+        const {
+            longitude,
+            latitude,
+        } = req.body;
+
+        const vendor =
+            await vendorService.updateVendorCurrentLocation(
+                req.user._id,
+                longitude,
+                latitude
+            );
+
+        return res.status(200).json({
+
+            success: true,
+
+            message:
+                "Vendor location updated successfully.",
+
+            data: {
+                location: vendor.location,
+            },
+
+        });
+
+    } catch (error) {
+
+        next(error);
+
+    }
+
+};
+
 export const deleteVendorProfile =
     async (
 

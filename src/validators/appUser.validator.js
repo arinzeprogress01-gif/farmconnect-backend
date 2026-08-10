@@ -47,6 +47,8 @@ const appUserProfileSchema = Joi.object({
         .max(300)
 
         .optional(),
+    
+    
 
 });
 

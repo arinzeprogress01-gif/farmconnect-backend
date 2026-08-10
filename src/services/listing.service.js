@@ -112,8 +112,7 @@ export const createNewListing = async (
 
         pickupLocation = vendor.currentLocation;
 
-        // Vendor's saved coordinates become
-        // the listing's geographic location.
+        // Vendor's saved coordinates become the listing's geographic location.
         location = vendor.location;
 
     } else {

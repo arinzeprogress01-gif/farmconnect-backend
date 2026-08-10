@@ -2,7 +2,9 @@ import vendorProfileSchema from "../validators/vendor.validator.js";
 
 import User from "../models/user.models.js";
 
-import sendNotification  from "../utils/sendNotification.js";
+import sendNotification from "../utils/sendNotification.js";
+
+import {createGeoPoint, isValidCoordinates} from "../utils/geoLocation.js";
 
 import {
     createVendor,
@@ -11,7 +13,8 @@ import {
     updateVendors,
     getVendorByUserId,
     updateVendorProfile,
-    deleteVendorProfile
+    deleteVendorProfile,
+    updateVendorLocation
 
 } from "../repositories/vendor.repository.js";
 
@@ -173,6 +176,48 @@ export const updateVendor = async (
 
     return updatedVendor;
 
+};
+
+export const updateVendorCurrentLocation = async (
+    userId,
+    longitude,
+    latitude
+) => {
+
+    if (
+        !isValidCoordinates(
+            longitude,
+            latitude
+        )
+    ) {
+        throw new BadRequestError(
+            "Invalid location coordinates."
+        );
+    }
+
+    const vendor =
+        await getVendorByUserId(userId);
+
+    if (!vendor) {
+
+        throw new NotFoundError(
+            "Vendor profile not found."
+        );
+
+    }
+
+    const location = {
+        type: "Point",
+        coordinates: [
+            Number(longitude),
+            Number(latitude),
+        ],
+    };
+
+    return await updateVendorLocation(
+        userId,
+        location
+    );
 };
 
 export const deleteVendor = async (
