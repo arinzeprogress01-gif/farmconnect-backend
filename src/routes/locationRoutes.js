@@ -8,7 +8,6 @@ const router = express.Router();
  */
 router.get("/search", async (req, res) => {
     console.log("🔥 LOCATION SEARCH ROUTE HIT");
-    console.log("🔥 ABOUT TO READ QUERY");
 
     try {
         const {
@@ -17,17 +16,7 @@ router.get("/search", async (req, res) => {
             state,
         } = req.query;
 
-        console.log("🔥 QUERY RECEIVED:", {
-            street,
-            city,
-            state,
-        });
-
-        console.log("🔥 CHECKING REQUIRED FIELDS");
-
         if (!street || !city || !state) {
-            console.log("🔥 REQUIRED FIELDS FAILED");
-
             return res.status(400).json({
                 success: false,
                 message:
@@ -35,64 +24,66 @@ router.get("/search", async (req, res) => {
             });
         }
 
-        console.log("🔥 REQUIRED FIELDS PASSED");
+        const cleanStreet = String(street).trim();
+        const cleanCity = String(city).trim();
+        const cleanState = String(state).trim();
 
-        const addressQuery = [
-            String(street).trim(),
-            String(city).trim(),
-            String(state).trim(),
-            "Nigeria",
-        ].join(", ");
+        /*
+         * Try the most specific query first.
+         */
+        const queries = [
+            `${cleanStreet}, ${cleanCity}, ${cleanState}, Nigeria`,
+            `${cleanStreet}, ${cleanState}, Nigeria`,
+            `${cleanCity}, ${cleanState}, Nigeria`,
+        ];
 
-        console.log(
-            "🔥 ADDRESS QUERY CREATED:",
-            addressQuery
-        );
+        let results = [];
 
-        const params = new URLSearchParams({
-            q: addressQuery,
-            countrycodes: "ng",
-            format: "jsonv2",
-            addressdetails: "1",
-            limit: "1",
-        });
-
-        console.log(
-            "🔥 PARAMS CREATED:",
-            params.toString()
-        );
-
-        console.log(
-            "🔥 ROUTE IS ABOUT TO CALL NOMINATIM"
-        );
-
-        const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?${params.toString()}`,
-            {
-                headers: {
-                    "User-Agent": "FarmConnect/1.0",
-                    Accept: "application/json",
-                },
-            }
-        );
-
-        console.log(
-            "🔥 NOMINATIM RESPONSE:",
-            response.status
-        );
-
-        if (!response.ok) {
-            throw new Error(
-                `Geocoding service failed with status ${response.status}.`
+        for (const query of queries) {
+            console.log(
+                "🔥 NOMINATIM QUERY:",
+                query
             );
+
+            const params = new URLSearchParams({
+                q: query,
+                countrycodes: "ng",
+                format: "jsonv2",
+                addressdetails: "1",
+                limit: "1",
+            });
+
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/search?${params.toString()}`,
+                {
+                    headers: {
+                        "User-Agent":
+                            "FarmConnect/1.0",
+                        Accept:
+                            "application/json",
+                    },
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(
+                    `Nominatim returned ${response.status}`
+                );
+            }
+
+            const currentResults =
+                await response.json();
+
+            console.log(
+                "🔥 RESULTS:",
+                currentResults.length
+            );
+
+            if (currentResults.length > 0) {
+                results = currentResults;
+                break;
+            }
         }
-
-        const results = await response.json();
-
-        console.log(
-            "🔥 NOMINATIM RESULTS:",
-            results
-        );
 
         if (!results.length) {
             return res.status(404).json({
@@ -107,10 +98,15 @@ router.get("/search", async (req, res) => {
         return res.status(200).json({
             success: true,
             data: {
-                latitude: Number(location.lat),
-                longitude: Number(location.lon),
+                latitude: Number(
+                    location.lat
+                ),
+                longitude: Number(
+                    location.lon
+                ),
                 displayName:
-                    location.display_name || "",
+                    location.display_name ||
+                    "",
             },
         });
     } catch (error) {
