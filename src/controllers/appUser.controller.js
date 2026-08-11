@@ -148,7 +148,7 @@ export const updateAppUserLocation = async (
         } = req.body;
 
         const profile =
-            await appUserService.updateAppUserLocationService(
+            await updateAppUserLocationService(
                 req.user._id,
                 longitude,
                 latitude
