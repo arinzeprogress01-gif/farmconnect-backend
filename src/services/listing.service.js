@@ -13,6 +13,8 @@ import User from "../models/user.models.js";
 
 import VendorProfile from "../models/vendor.model.js";
 
+import { isValidCoordinates } from "../utils/geoLocation.js";
+
 import generateListingId from "../utils/generateListingId.js";
 
 import {
