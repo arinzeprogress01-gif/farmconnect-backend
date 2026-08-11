@@ -3,6 +3,8 @@ import  sendNotification  from "../utils/sendNotification.js";
 
 import AppUserProfile from "../models/appUserProfile.model.js";
 
+import { isValidCoordinates } from "../utils/geoLocation.js";
+
 import { findUserById } from "../repositories/user.repository.js";
 
 import {
