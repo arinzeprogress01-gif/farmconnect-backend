@@ -12,6 +12,8 @@ import {
 
     updateProfile,
 
+    updateAppUserLocation,
+
     deleteProfile,
 
 } from "../controllers/appUser.controller.js";
@@ -52,6 +54,14 @@ router.patch(
 
     updateProfile
 
+);
+
+router.patch(
+    "/profile/location",
+
+    authenticate,
+    
+    updateAppUserLocation
 );
 
 router.delete(

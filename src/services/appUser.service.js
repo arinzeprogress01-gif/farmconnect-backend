@@ -1,7 +1,7 @@
 import appUserProfileSchema from "../validators/appUser.validator.js";
 import  sendNotification  from "../utils/sendNotification.js";
 
-import User from "../models/user.models.js";
+import AppUserProfile from "../models/appUserProfile.model.js";
 
 import { findUserById } from "../repositories/user.repository.js";
 
@@ -177,6 +177,51 @@ export const updateUserProfile = async (
 
     );
 
+};
+
+export const updateAppUserLocationService = async (
+    userId,
+    longitude,
+    latitude
+) => {
+    if (
+        !isValidCoordinates(
+            longitude,
+            latitude
+        )
+    ) {
+        throw new BadRequestError(
+            "Invalid location coordinates."
+        );
+    }
+
+    const profile =
+        await AppUserProfile.findOneAndUpdate(
+            { userId },
+            {
+                $set: {
+                    location: {
+                        type: "Point",
+                        coordinates: [
+                            Number(longitude),
+                            Number(latitude),
+                        ],
+                    },
+                },
+            },
+            {
+                new: true,
+                runValidators: true,
+            }
+        );
+
+    if (!profile) {
+        throw new NotFoundError(
+            "User profile not found."
+        );
+    }
+
+    return profile;
 };
 
 export const deleteUserProfile = async (

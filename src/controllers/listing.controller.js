@@ -304,7 +304,7 @@ export const getNearbyListings = async (req, res, next) => {
                 latitude,
                 maxDistance
                     ? Number(maxDistance)
-                    : 10000
+                    : 30000
             );
 
         return res.status(200).json({

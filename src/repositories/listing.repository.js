@@ -313,11 +313,20 @@ export const findNearbyListings = async (userId) => {
 export const findNearbyListingsByCoordinates = async (
     longitude,
     latitude,
-    maxDistance = 10000
+    maxDistance = 30000
 ) => {
+    if (
+        !isValidCoordinates(
+            longitude,
+            latitude
+        )
+    ) {
+        throw new BadRequestError(
+            "Invalid location coordinates."
+        );
+    }
 
-    return await Listing.find({
-
+    const listings = await Listing.find({
         location: {
             $near: {
                 $geometry: {
@@ -327,24 +336,22 @@ export const findNearbyListingsByCoordinates = async (
                         Number(latitude),
                     ],
                 },
-
-                $maxDistance: maxDistance,
+                $maxDistance: Number(maxDistance),
             },
         },
 
         status: "available",
         isActive: true,
-
     })
-
         .populate(
             "vendorId",
-            "businessName currentLocation profileImage"
+            "businessName currentLocation"
         )
-
         .sort({
             createdAt: -1,
         });
+
+    return listings;
 };
 
 export const updateListing = async (

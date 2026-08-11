@@ -299,7 +299,7 @@ export const getNearbyListingsService = async (
     userId,
     longitude,
     latitude,
-    maxDistance = 10000
+    maxDistance = 30000
 ) => {
 
     // If coordinates are supplied, use real geographic proximity.
@@ -320,9 +320,9 @@ export const getNearbyListingsService = async (
         }
 
         return await findNearbyListingsByCoordinates(
-            longitude,
-            latitude,
-            maxDistance
+            Number(longitude),
+            Number(latitude),
+            Number(maxDistance)
         );
     }
 
@@ -340,6 +340,7 @@ export const getNearbyListingsService = async (
 
     return listings;
 };
+
 
 export const updateMyListing = async (
 

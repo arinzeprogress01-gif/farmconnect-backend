@@ -8,6 +8,8 @@ import {
 
     deleteUserProfile,
 
+    updateAppUserLocationService,
+
 } from "../services/appUser.service.js";
 
 export const createProfile = async (
@@ -132,6 +134,38 @@ export const updateProfile = async (
 
     }
 
+};
+
+export const updateAppUserLocation = async (
+    req,
+    res,
+    next
+) => {
+    try {
+        const {
+            longitude,
+            latitude,
+        } = req.body;
+
+        const profile =
+            await appUserService.updateAppUserLocationService(
+                req.user._id,
+                longitude,
+                latitude
+            );
+
+        return res.status(200).json({
+            success: true,
+            message:
+                "User location updated successfully.",
+            data: {
+                location:
+                    profile.location,
+            },
+        });
+    } catch (error) {
+        next(error);
+    }
 };
 
 export const deleteProfile = async (
