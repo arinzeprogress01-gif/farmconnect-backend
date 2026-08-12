@@ -2,175 +2,122 @@ import Listing from "../models/listing.model.js";
 import Reservation from "../models/reservation.model.js";
 
 export const getVendorAnalytics = async (vendorId) => {
-
     const today = new Date();
 
-    today.setHours(
-        0,
-        0,
-        0,
-        0
-    );
+    today.setHours(0, 0, 0, 0);
 
     const [
-
         totalListings,
-
         activeListings,
-
         completedListings,
-
         expiredListings,
-
         cancelledListings,
-
         totalReservations,
-
         completedReservations,
-
         cancelledReservations,
-
+        mealsSharedToday,
         mealsShared,
-
-
+        discardedMeals,
     ] = await Promise.all([
-
         Listing.countDocuments({
-
             vendorId,
-
         }),
 
         Listing.countDocuments({
-
             vendorId,
-
             status: "available",
-
             isActive: true,
-
         }),
 
         Listing.countDocuments({
-
             vendorId,
-
             status: "completed",
-
         }),
 
         Listing.countDocuments({
-
             vendorId,
-
             status: "expired",
-
         }),
 
         Listing.countDocuments({
-
             vendorId,
-
             status: "cancelled",
-
         }),
 
         Reservation.countDocuments({
-
             vendor: vendorId,
-
         }),
 
         Reservation.countDocuments({
-
             vendor: vendorId,
-
             status: "completed",
-
         }),
 
         Reservation.countDocuments({
-
             vendor: vendorId,
-
             status: "cancelled",
-
-            
-
         }),
 
         Reservation.countDocuments({
-
             vendor: vendorId,
-
             createdAt: {
-
                 $gte: today,
-
             },
-
         }),
 
         Reservation.aggregate([
-
             {
-
                 $match: {
-
                     vendor: vendorId,
-
                     status: "completed",
-
                 },
-
             },
-
             {
-
                 $group: {
-
                     _id: null,
-
                     total: {
-
-                        $sum:
-
-                            "$quantityRequested",
-
+                        $sum: "$quantityRequested",
                     },
-
                 },
-
             },
-
         ]),
 
+        Listing.aggregate([
+            {
+                $match: {
+                    vendorId,
+                    status: "expired",
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    total: {
+                        $sum: "$quantity",
+                    },
+                },
+            },
+        ]),
     ]);
 
     return {
-
         totalListings,
-
         activeListings,
-
         completedListings,
-
         expiredListings,
-
         cancelledListings,
-
         totalReservations,
-
         completedReservations,
-
         cancelledReservations,
 
-        mealsShared:
+        mealsSharedToday,
 
+        mealsShared:
             mealsShared[0]?.total || 0,
 
+        discardedMeals:
+            discardedMeals[0]?.total || 0,
     };
-
 };
 
 export const getUserDashboardAnalytics = async (userId) => {
