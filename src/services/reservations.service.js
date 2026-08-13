@@ -48,11 +48,9 @@ export const reserveListing = async (
         );
 
     if (error) {
-
         throw new BadRequestError(
             error.details[0].message
         );
-
     }
 
     const {
@@ -64,44 +62,10 @@ export const reserveListing = async (
         await User.findById(userId);
 
     if (!user) {
-
         throw new NotFoundError(
             "User not found."
         );
-
-    };
-
-    if (
-
-    user.reservationRestriction?.listing &&
-
-    user.reservationRestriction.listing.toString() === listing._id.toString() &&
-
-    user.reservationRestriction.blockedUntil > new Date()
-
-) {
-
-    const minutesLeft = Math.ceil(
-
-        (
-
-            user.reservationRestriction.blockedUntil -
-
-            new Date()
-
-        ) /
-
-        (60 * 1000)
-
-    );
-
-    throw new BadRequestError(
-
-        `You recently cancelled this listing. Please wait ${minutesLeft} minute(s) before reserving it again.`
-
-    );
-
-}
+    }
 
     const listing =
         await findListingById(
@@ -109,33 +73,49 @@ export const reserveListing = async (
         );
 
     if (!listing) {
-
         throw new NotFoundError(
             "Food listing not found."
         );
-
     }
 
+    // Prevent a user from immediately reserving
+    // a listing they recently cancelled.
+    if (
+        user.reservationRestriction?.listing &&
+        user.reservationRestriction.listing.toString() ===
+            listing._id.toString() &&
+        user.reservationRestriction.blockedUntil > new Date()
+    ) {
+
+        const minutesLeft = Math.ceil(
+            (
+                user.reservationRestriction.blockedUntil -
+                new Date()
+            ) / (60 * 1000)
+        );
+
+        throw new BadRequestError(
+            `You recently cancelled this listing. Please wait ${minutesLeft} minute(s) before reserving it again.`
+        );
+    }
+
+    // Make sure the listing can still be reserved.
     if (
         listing.status !== "available" ||
         !listing.isActive
     ) {
-
         throw new BadRequestError(
             "This food listing is no longer available."
         );
-
     }
 
     if (
         quantityRequested >
         listing.quantity
     ) {
-
         throw new BadRequestError(
             "Requested quantity exceeds available quantity."
         );
-
     }
 
     const reservation = await createReservation({
@@ -170,10 +150,14 @@ export const reserveListing = async (
 
     });
 
+    // Reduce the remaining quantity.
     listing.quantity -= quantityRequested;
 
+    // Track how many reservations have been made.
     listing.totalReservations += 1;
 
+    // If everything has been reserved,
+    // automatically complete the listing.
     if (listing.quantity <= 0) {
 
         listing.quantity = 0;
@@ -188,52 +172,60 @@ export const reserveListing = async (
 
     /*
         Store Notification
-
         Push Notification
-
         Email Notification
     */
-    
+
+    // Notify vendor.
     await sendNotification({
 
-    receiver: listing.vendorId,
+        receiver:
+            listing.vendorId,
 
-    title: "New Reservation",
+        title:
+            "New Reservation",
 
-    message:
-        `${user.fullName} reserved ${quantityRequested} portion(s) of ${listing.foodName}.`,
+        message:
+            `${user.fullName} reserved ${quantityRequested} portion(s) of ${listing.foodName}.`,
 
-    type: "reservation",
+        type:
+            "reservation",
 
-    priority: "high",
+        priority:
+            "high",
 
-    data: {
+        data: {
 
-        reservationId:
-            reservation.reservationId,
+            reservationId:
+                reservation.reservationId,
 
-        listingId:
-            listing.listingId,
+            listingId:
+                listing.listingId,
 
-        action:
-            "OPEN_VENDOR_RESERVATIONS",
+            action:
+                "OPEN_VENDOR_RESERVATIONS",
 
-    },
+        },
 
-});
+    });
 
+    // Notify user.
     await sendNotification({
 
-        receiver: user._id,
+        receiver:
+            user._id,
 
-        title: "Reservation Confirmed",
+        title:
+            "Reservation Confirmed",
 
         message:
             `Your reservation for ${listing.foodName} was successful. Pickup Code: ${reservation.pickupCode}.`,
 
-        type: "reservation",
+        type:
+            "reservation",
 
-        priority: "high",
+        priority:
+            "high",
 
         data: {
 
@@ -247,20 +239,25 @@ export const reserveListing = async (
 
     });
 
+    // Notify vendor if the listing is now completely reserved.
     if (listing.quantity === 0) {
 
         await sendNotification({
 
-            receiver: listing.vendorId,
+            receiver:
+                listing.vendorId,
 
-            title: "Listing Completed",
+            title:
+                "Listing Completed",
 
             message:
                 `${listing.foodName} has been completely reserved.`,
 
-            type: "listing",
+            type:
+                "listing",
 
-            priority: "medium",
+            priority:
+                "medium",
 
             data: {
 
@@ -277,7 +274,6 @@ export const reserveListing = async (
     }
 
     return reservation;
-
 };
 
 export const cancelReservation = async (
