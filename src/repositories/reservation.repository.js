@@ -69,21 +69,20 @@ export const getVendorReservations = async (vendorId) => {
 };
 
 export const getUserReservations = async (userId) => {
-
     return Reservation.find({
-
         user: userId,
-
     })
-
-        .populate("vendor", "businessName")
-
+        .populate(
+            "listing",
+            "foodName pickupLocation imageUrls"
+        )
+        .populate(
+            "vendor",
+            "businessName"
+        )
         .sort({
-
             createdAt: -1,
-
         });
-
 };
 
 export const updateReservation = async (reservation) => {
