@@ -130,6 +130,10 @@ const listingSchema = new mongoose.Schema({
 
             "available",
 
+            "pendingCompletion",
+
+            "fullReserved",
+
             "expired",
 
             "completed",

@@ -17,7 +17,12 @@ export const startListingExpirationJob = () => {
 
             const expiredListings = await Listing.find({
 
-                status: "available",
+                status: {
+                    $in: [
+                        "available",
+                        "pendingCompletion",
+                    ],
+                },
 
                 isActive: true,
 

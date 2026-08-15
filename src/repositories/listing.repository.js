@@ -113,7 +113,12 @@ export const getMarketListings = async (filters = {}) => {
 
     const query = {
 
-        status: "available",
+        status: {
+            $in: [
+                "available",
+                "pendingCompletion",
+            ],
+        },
 
         isActive: true,
 
@@ -328,21 +333,40 @@ export const findNearbyListingsByCoordinates = async (
     }
 
     const listings = await Listing.find({
+
         location: {
+
             $near: {
+
                 $geometry: {
+
                     type: "Point",
+
                     coordinates: [
                         Number(longitude),
                         Number(latitude),
                     ],
+
                 },
-                $maxDistance: Number(maxDistance),
+
+                $maxDistance:
+                    Number(maxDistance),
+
             },
+
         },
 
-        status: "available",
+        status: {
+
+            $in: [
+                "available",
+                "pendingCompletion",
+            ],
+
+        },
+
         isActive: true,
+
     })
         .populate(
             "vendorId",

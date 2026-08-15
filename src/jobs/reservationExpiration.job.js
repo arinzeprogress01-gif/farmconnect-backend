@@ -37,15 +37,17 @@ export const startReservationExpirationJob = () => {
                     reservation.quantityRequested;
 
                 // Reopen listing if it was completed
+                // Reopen listing if the expired reservation
+                // releases quantity back into the listing.
                 if (
-                    listing.status === "completed"
+                    listing.quantity > 0
                 ) {
 
                     listing.status = "available";
+
                     listing.isActive = true;
 
                 }
-
                 await listing.save();
 
                 reservation.status = "expired";

@@ -121,3 +121,36 @@ getCoordinatesFromLocation()  getLocationFromCoordinates()
              ▼                       ▼
       pickupLocation            latitude
       street/city/state         longitude
+
+
+                       ┌──────────────────────┐
+                 │      AVAILABLE       │
+                 └──────────┬───────────┘
+                            │
+                   reservation created
+                            │
+                            ▼
+                    quantity > 0
+                            │
+                            │
+                  quantity reaches 0
+                            │
+                            ▼
+              ┌─────────────────────────┐
+              │   PENDING COMPLETION    │
+              │                         │
+              │ Reservations still      │
+              │ awaiting fulfilment     │
+              └────────────┬────────────┘
+                           │
+                 all reservations
+                    completed
+                           │
+                           ▼
+              ┌─────────────────────────┐
+              │     FULLY RESERVED      │
+              │                         │
+              │ quantity = 0            │
+              │ no active reservations  │
+              │ isActive = false        │
+              └─────────────────────────┘

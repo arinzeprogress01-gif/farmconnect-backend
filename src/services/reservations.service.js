@@ -159,13 +159,9 @@ export const reserveListing = async (
     // If everything has been reserved,
     // automatically complete the listing.
     if (listing.quantity <= 0) {
-
         listing.quantity = 0;
-
-        listing.status = "completed";
-
-        listing.isActive = false;
-
+        listing.status = "pendingCompletion";
+        listing.isActive = true;
     }
 
     await listing.save();
@@ -244,20 +240,16 @@ export const reserveListing = async (
 
         await sendNotification({
 
-            receiver:
-                listing.vendorId,
+            receiver: listing.vendorId,
 
-            title:
-                "Listing Completed",
+            title: "Listing Fully Reserved",
 
             message:
-                `${listing.foodName} has been completely reserved.`,
+                `${listing.foodName} has been fully reserved and is awaiting reservation completion.`,
 
-            type:
-                "listing",
+            type: "listing",
 
-            priority:
-                "medium",
+            priority: "medium",
 
             data: {
 
@@ -372,24 +364,19 @@ export const cancelReservation = async (
     }
 
     // Restore Quantity
-
     listing.quantity +=
-
         reservation.quantityRequested;
 
-    // Re-open listing if necessary
-
+    // Re-open listing if necessary.
     if (
-
-        listing.status === "completed"
-
+        listing.status === "pendingCompletion" ||
+        listing.status === "fullReserved"
     ) {
 
         listing.status = "available";
-
         listing.isActive = true;
 
-    };
+    }
 
     await listing.save();
 
@@ -511,11 +498,36 @@ export const completeReservation = async (
     }
 
     reservation.status = "completed";
-
     reservation.completedAt = new Date();
 
     await updateReservation(reservation);
 
+    const listing = await findListingByObjectId(
+        reservation.listing
+    );
+
+    if (!listing) {
+        throw new NotFoundError(
+            "Food listing not found."
+        );
+    }
+
+    const pendingReservations = await Reservation.countDocuments({
+        listing: listing._id,
+        status: "reserved",
+    });
+
+    if (
+        listing.quantity === 0 &&
+        pendingReservations === 0
+    ) {
+
+        listing.status = "fullReserved";
+        listing.isActive = false;
+
+        await listing.save();
+
+    }
     /*
 
         Store Notification
@@ -623,8 +635,17 @@ export const cancelUserReservation = async (
     );
 
     listing.quantity +=
+    reservation.quantityRequested;
 
-        reservation.quantityRequested;
+    if (
+        listing.status === "pendingCompletion" ||
+        listing.status === "fullReserved"
+    ) {
+
+        listing.status = "available";
+        listing.isActive = true;
+
+        };
 
     await listing.save();
 
@@ -797,4 +818,58 @@ export const getUserReservationHistory = async (
 
     );
 
+};
+
+export const updateListingReservationStatus = async (
+    listingId
+) => {
+
+    const listing = await findListingByObjectId(listingId);
+
+    if (!listing) {
+        throw new NotFoundError(
+            "Food listing not found."
+        );
+    }
+
+    // If there is still available quantity,
+    // the listing remains available.
+    if (listing.quantity > 0) {
+
+        listing.status = "available";
+        listing.isActive = true;
+
+        await listing.save();
+
+        return listing;
+    }
+
+    // At this point quantity is completely allocated.
+    listing.quantity = 0;
+
+    // Check whether any reservation is still awaiting fulfilment.
+    const pendingReservations =
+        await Reservation.countDocuments({
+            listing: listing._id,
+            status: "reserved",
+        });
+
+    if (pendingReservations > 0) {
+
+        listing.status = "pendingCompletion";
+        listing.isActive = true;
+
+    } else {
+
+        // No active reservations remain.
+        // Every reservation has either been completed
+        // or cancelled, and there is no quantity left.
+        listing.status = "fullReserved";
+        listing.isActive = false;
+
+    }
+
+    await listing.save();
+
+    return listing;
 };
