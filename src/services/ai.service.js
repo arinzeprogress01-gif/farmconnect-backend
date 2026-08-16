@@ -6,14 +6,28 @@ import AppUserProfile from "../models/appUserProfile.model.js";
 import NotFoundError from "../errors/NotFoundError.js";
 import BadRequestError from "../errors/BadRequestError.js";
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-});
+const getOpenAIClient = () => {
+
+    if (!process.env.OPENAI_API_KEY) {
+
+        throw new BadRequestError(
+            "AI service is not configured."
+        );
+
+    }
+
+    return new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+    });
+
+};
 
 export const askFarmConnectAI = async (
     userId,
     message
 ) => {
+
+    const openai = getOpenAIClient();
 
     if (!message?.trim()) {
         throw new BadRequestError(
