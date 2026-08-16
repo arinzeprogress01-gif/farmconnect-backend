@@ -20,6 +20,7 @@ import notificationRoutes from "./routes/notification.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
 
 import locationRoutes from "./routes/locationRoutes.js";
+import aiRoutes from "./routes/ai.routes.js";
 
 import notFound from "./middleware/not-found.middleware.js";
 import errorHandler from "./middleware/error.middleware.js";
@@ -87,7 +88,11 @@ app.use(
     analyticsRoutes
 );
 
-app.use("/api/v1/location", locationRoutes)
+app.use("/api/v1/location", locationRoutes);
+app.use(
+    "/api/ai",
+    aiRoutes
+);
 
 app.use(
     "/api-docs",
