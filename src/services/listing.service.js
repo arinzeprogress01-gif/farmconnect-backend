@@ -589,7 +589,7 @@ export const getListingDetails = async (listingId) => {
     }
 
     const reservationSummary =
-        await Reservation.aggregate([
+        await reservation.aggregate([
 
             {
                 $match: {
