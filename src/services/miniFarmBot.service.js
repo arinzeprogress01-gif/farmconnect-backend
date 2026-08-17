@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 
 import Listing from "../models/listing.model.js";
 import AppUserProfile from "../models/appUserProfile.model.js";
+import VendorProfile from "../models/vendor.model.js";
 
 import NotFoundError from "../errors/NotFoundError.js";
 import BadRequestError from "../errors/BadRequestError.js";
@@ -25,18 +26,31 @@ export const askMiniFarmBot = async (
 
     }
 
-    const profile =
+    const userProfile =
         await AppUserProfile.findOne({
             userId,
         });
 
-    if (!profile) {
+    const vendorProfile =
+        await VendorProfile.findOne({
+            userId,
+        });
+
+    if (!userProfile && !vendorProfile) {
 
         throw new NotFoundError(
-            "User profile not found."
+            "User or vendor profile not found."
         );
 
     }
+
+    const profile =
+        userProfile || vendorProfile;
+
+    const accountType =
+        vendorProfile
+            ? "VENDOR"
+            : "USER";
 
     const listings =
         await Listing.find({
@@ -55,11 +69,11 @@ export const askMiniFarmBot = async (
             },
 
         })
-        .populate(
-            "vendorId",
-            "businessName"
-        )
-        .limit(20);
+            .populate(
+                "vendorId",
+                "businessName"
+            )
+            .limit(20);
 
     const listingContext =
         listings.map((listing) => ({
@@ -121,6 +135,13 @@ LIVE USER MESSAGE
 
 USER:
 ${message}
+
+==================================================
+CURRENT ACCOUNT
+==================================================
+
+Account Type:
+${accountType}
 
 ==================================================
 CURRENT USER PROFILE
@@ -200,10 +221,12 @@ Mini Farm Bot provides information and guidance.
 It does not perform application actions through conversation.
 
 Keep responses concise, friendly and useful.
+
 User Customer Support: Contact FarmConnect support for account or technical issues on
 EMAIL: arinzeprogresso1@gmail.com
 Phone: +234 8117146866
 whatsapp: +234 9023339055
+
 ==================================================
 USER REQUEST
 ==================================================
