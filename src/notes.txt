@@ -154,3 +154,38 @@ getCoordinatesFromLocation()  getLocationFromCoordinates()
               │ no active reservations  │
               │ isActive = false        │
               └─────────────────────────┘
+
+
+
+                                  FARMCONNECT
+                         │
+                         ▼
+                ┌─────────────────┐
+                │  Mini Farm Bot  │
+                │   API /chat     │
+                └────────┬────────┘
+                         │
+                         ▼
+              ┌─────────────────────┐
+              │ Knowledge Builder   │
+              └─────────┬───────────┘
+                        │
+       ┌────────────────┼────────────────┐
+       ▼                ▼                ▼
+   User Data        Listings         Vendor Data
+       │                │                │
+       ├────────────────┼────────────────┤
+       │                │                │
+       ▼                ▼                ▼
+ Reservations       Categories      FarmConnect
+ Locations          Availability     Features
+       │                │                │
+       └────────────────┼────────────────┘
+                        ▼
+                Gemini System Prompt
+                        │
+                        ▼
+                 Clean AI Response
+                        │
+                        ▼
+                    Frontend
