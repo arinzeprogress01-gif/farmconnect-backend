@@ -68,7 +68,7 @@ const listingSchema = new mongoose.Schema({
 
     },
 
-    quantity: {
+    totalQuantity: {
 
         type: Number,
 
@@ -78,6 +78,15 @@ const listingSchema = new mongoose.Schema({
 
     },
 
+    quantity: {
+
+        type: Number,
+
+        required: true,
+
+        min: 0,
+
+    },
     imageUrls: [
 
         {

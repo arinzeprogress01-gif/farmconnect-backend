@@ -174,6 +174,8 @@ export const createNewListing = async (
 
             description: value.description,
 
+            totalQuantity: value.quantity,
+
             quantity: value.quantity,
 
             pickupLocation,

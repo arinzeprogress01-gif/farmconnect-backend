@@ -13,7 +13,7 @@ import {
     getListingsByCategory,
     getFoodCategories,
     getNearbyListings,
-    
+    getListingDetails,
 } from "../controllers/listing.controller.js";
 
 const router = express.Router();
@@ -72,6 +72,13 @@ router.get(
 
 );
 
+router.get(
+    "/:listingId/details",
+    authenticate,
+    vendorOnly,
+    getListingDetails
+);
+
 router.patch(
 
     "/:listingId",
@@ -83,6 +90,7 @@ router.patch(
     updateListing
 
 );
+
 
 router.delete(
 

@@ -324,3 +324,30 @@ export const getNearbyListings = async (req, res, next) => {
 
     }
 };
+
+export const getListingDetails = async (
+    req,
+    res
+) => {
+
+    const { listingId } =
+        req.params;
+
+    const listing =
+        await listingService.getListingDetails(
+            listingId
+        );
+
+    res.status(200).json({
+
+        success: true,
+
+        message:
+            "Listing details fetched successfully.",
+
+        data:
+            listing,
+
+    });
+
+};
