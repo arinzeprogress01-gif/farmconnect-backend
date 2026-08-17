@@ -1,5 +1,5 @@
 import listingSchema from "../validators/listing.validator.js";
-import { Reservation } from "../models/reservation.model.js";
+import Reservation from "../models/reservation.model.js";
 
 import  sendNotification  from "../utils/sendNotification.js";
 
