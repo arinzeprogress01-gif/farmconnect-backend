@@ -1,4 +1,5 @@
 import listingSchema from "../validators/listing.validator.js";
+import { Reservation } from "../models/reservation.model.js";
 
 import  sendNotification  from "../utils/sendNotification.js";
 
@@ -589,7 +590,7 @@ export const getListingDetails = async (listingId) => {
     }
 
     const reservationSummary =
-        await reservation.aggregate([
+        await Reservation.aggregate([
 
             {
                 $match: {
