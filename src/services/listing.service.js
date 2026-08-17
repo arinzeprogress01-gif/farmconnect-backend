@@ -574,3 +574,173 @@ export const getFoodCategories = async () => {
     return FOOD_CATEGORIES;
 
 };
+
+export const getListingDetails = async (listingId) => {
+
+    const listing =
+        await findListingById(listingId);
+
+    if (!listing) {
+
+        throw new NotFoundError(
+            "Food listing not found."
+        );
+
+    }
+
+    const reservationSummary =
+        await Reservation.aggregate([
+
+            {
+                $match: {
+                    listing: listing._id,
+                },
+            },
+
+            {
+                $group: {
+
+                    _id: null,
+
+                    totalReservations: {
+                        $sum: 1,
+                    },
+
+                    reservedQuantity: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        "reserved",
+                                    ],
+                                },
+                                "$quantityRequested",
+                                0,
+                            ],
+                        },
+                    },
+
+                    completedPickups: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        "completed",
+                                    ],
+                                },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+
+                    pendingPickups: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        "reserved",
+                                    ],
+                                },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+
+                    expired: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        "expired",
+                                    ],
+                                },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+
+                },
+
+            },
+
+        ]);
+
+    const summary =
+        reservationSummary[0] || {
+
+            totalReservations: 0,
+
+            reservedQuantity: 0,
+
+            completedPickups: 0,
+
+            pendingPickups: 0,
+
+            expired: 0,
+
+        };
+
+    const totalQuantity =
+        listing.totalQuantity;
+
+    const availableQuantity =
+        listing.quantity;
+
+    const reservedQuantity =
+        summary.reservedQuantity;
+
+    const reservedPercentage =
+        totalQuantity > 0
+            ? Math.round(
+                (
+                    reservedQuantity /
+                    totalQuantity
+                ) * 100
+            )
+            : 0;
+
+    return {
+
+        listingId:
+            listing.listingId,
+
+        foodName:
+            listing.foodName,
+
+        category:
+            listing.category,
+
+        totalQuantity,
+
+        reservedQuantity,
+
+        availableQuantity,
+
+        reservedPercentage,
+
+        reservationSummary: {
+
+            totalReservations:
+                summary.totalReservations,
+
+            completedPickups:
+                summary.completedPickups,
+
+            pendingPickups:
+                summary.pendingPickups,
+
+            expired:
+                summary.expired,
+
+        },
+
+    };
+
+};
