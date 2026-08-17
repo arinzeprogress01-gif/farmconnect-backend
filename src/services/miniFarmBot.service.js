@@ -200,7 +200,10 @@ Mini Farm Bot provides information and guidance.
 It does not perform application actions through conversation.
 
 Keep responses concise, friendly and useful.
-
+User Customer Support: Contact FarmConnect support for account or technical issues on
+EMAIL: arinzeprogresso1@gmail.com
+Phone: +234 8117146866
+whatsapp: +234 9023339055
 ==================================================
 USER REQUEST
 ==================================================
