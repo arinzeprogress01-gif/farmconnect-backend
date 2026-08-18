@@ -9,8 +9,10 @@ import {
     getVendorProfile,
     updateVendorProfile,
     deleteVendorProfile,
-    updateVendorCurrentLocation
+    updateVendorCurrentLocation,
 } from "../controllers/vendor.controller.js";
+
+import {getVendorReservationAnalytics} from "../controllers/reservation.controller.js"
 
 const router = express.Router();
 
@@ -36,6 +38,14 @@ router.get(
 
     getVendorProfile
 
+);
+
+
+router.get(
+    "/vendor/analytics",
+    authenticate,
+    vendorOnly,
+    getVendorReservationAnalytics
 );
 
 router.patch(

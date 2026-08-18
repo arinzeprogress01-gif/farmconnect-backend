@@ -21,6 +21,7 @@ import {
     getUserReservations,
     updateReservation,
     deleteReservation,
+    getVendorReservationAnalytics,
 } from "../repositories/reservation.repository.js";
 
 import {
@@ -749,7 +750,7 @@ export const getTheVendorReservations = async (vendorId) => {
         .populate("user", "fullName email phone")
         .populate(
             "listing",
-            "foodName pickupLocation expiresAt"
+            "listingId foodName category pickupLocation expiresAt imageUrls"
         )
         .sort({
             createdAt: -1,
@@ -883,3 +884,15 @@ export const updateListingReservationStatus = async (
     return listing;
 };
 
+
+export const getVendorReservationAnalyticsService = async (
+    vendorId
+) => {
+
+    const analytics =
+        await getVendorReservationAnalytics(
+            vendorId
+        );
+
+    return analytics;
+};

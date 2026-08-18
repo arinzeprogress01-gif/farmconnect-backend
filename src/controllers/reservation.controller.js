@@ -14,9 +14,15 @@ import {
 
     getUserReservationHistory,
 
-    cancelUserReservation
+    cancelUserReservation,
+
+    getVendorReservationAnalyticsService,
 
 } from "../services/reservations.service.js";
+
+import {findVendorByUserId} from "../repositories/vendor.repository.js";
+
+
 
 export const reserveFood = async (
 
@@ -337,5 +343,33 @@ export const cancelReservationByUser = async (
         next(error);
 
     }
+
+};
+
+
+
+export const getVendorReservationAnalytics = async (
+    req,
+    res
+) => {
+
+    const vendor =
+        await findVendorByUserId(req.user.userId);
+
+    const analytics =
+        await getVendorReservationAnalyticsService(
+                vendor._id
+            );
+
+    res.status(200).json({
+
+        success: true,
+
+        message:
+            "Vendor reservation analytics fetched successfully.",
+
+        data: analytics,
+
+    });
 
 };

@@ -53,18 +53,20 @@ export const findExpiredReservations = async () => {
 export const getVendorReservations = async (vendorId) => {
 
     return Reservation.find({
-
         vendor: vendorId,
-
     })
-
-        .populate("user", "fullName email phone")
-
+        .populate(
+            "user",
+            "fullName email phone"
+        )
+        .populate(
+            "listing",
+            "listingId foodName category pickupLocation expiresAt"
+        )
         .sort({
-
             createdAt: -1,
-
-        });
+        })
+        .lean();
 
 };
 
@@ -123,4 +125,46 @@ export const cancelReservationByUser = async (
 
     );
 
+};
+
+
+export const getVendorReservationAnalytics = async (vendorId) => {
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const reservations = await Reservation.find({
+        vendor: vendorId,
+        createdAt: {
+            $gte: startOfToday,
+            $lte: endOfToday,
+        },
+    }).lean();
+
+    return {
+        totalToday: reservations.length,
+
+        active: reservations.filter(
+            (reservation) =>
+                reservation.status === "reserved"
+        ).length,
+
+        completed: reservations.filter(
+            (reservation) =>
+                reservation.status === "completed"
+        ).length,
+
+        expired: reservations.filter(
+            (reservation) =>
+                reservation.status === "expired"
+        ).length,
+
+        cancelled: reservations.filter(
+            (reservation) =>
+                reservation.status === "cancelled"
+        ).length,
+    };
 };
