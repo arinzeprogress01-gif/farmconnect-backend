@@ -6,6 +6,10 @@ export const getVendorAnalytics = async (vendorId) => {
 
     today.setHours(0, 0, 0, 0);
 
+    const tomorrow = new Date(today);
+
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     const [
         totalListings,
         activeListings,
@@ -15,7 +19,7 @@ export const getVendorAnalytics = async (vendorId) => {
         totalReservations,
         completedReservations,
         cancelledReservations,
-        mealsSharedToday,
+        reservationsToday,
         mealsShared,
         discardedMeals,
     ] = await Promise.all([
@@ -58,10 +62,13 @@ export const getVendorAnalytics = async (vendorId) => {
             status: "cancelled",
         }),
 
+        // Reservations Today
         Reservation.countDocuments({
             vendor: vendorId,
+            status: "reserved",
             createdAt: {
                 $gte: today,
+                $lt: tomorrow,
             },
         }),
 
@@ -106,11 +113,12 @@ export const getVendorAnalytics = async (vendorId) => {
         completedListings,
         expiredListings,
         cancelledListings,
+
         totalReservations,
         completedReservations,
         cancelledReservations,
 
-        mealsSharedToday,
+        reservationsToday,
 
         mealsShared:
             mealsShared[0]?.total || 0,
@@ -119,7 +127,6 @@ export const getVendorAnalytics = async (vendorId) => {
             discardedMeals[0]?.total || 0,
     };
 };
-
 export const getUserDashboardAnalytics = async (userId) => {
 
     const reservations = await Reservation.find({
