@@ -20,6 +20,8 @@ import {
 
 } from "../services/reservations.service.js";
 
+import VendorProfile from "../models/vendorProfile.model.js";
+
 import {findVendorByUserId} from "../repositories/vendor.repository.js";
 
 
@@ -151,42 +153,38 @@ export const completeMyReservation = async (
 
 
 export const getVendorReservations = async (
-
     req,
-
     res,
-
     next
-
 ) => {
-
     try {
+        const vendor = await VendorProfile.findOne({
+            userId: req.user.id,
+        });
+
+        if (!vendor) {
+            return res.status(404).json({
+                success: false,
+                message: "Vendor profile not found.",
+            });
+        }
 
         const reservations =
-
             await getTheVendorReservations(
-
-                req.user.id
-
+                vendor._id
             );
 
         res.status(200).json({
-
             success: true,
-
             count: reservations.length,
-
             data: reservations,
-
         });
 
     } catch (error) {
-
         next(error);
-
     }
-
 };
+
 
 export const getUserReservations = async (
 
