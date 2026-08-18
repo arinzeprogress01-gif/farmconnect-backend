@@ -634,26 +634,27 @@ export const cancelUserReservation = async (
 
     }
 
-    const listing =
-
+   const listing =
     await findListingByObjectId(
-
         reservation.listing
-
     );
 
+    if (!listing) {
+        throw new NotFoundError(
+            "Food listing not found."
+        );
+    }
+
     listing.quantity +=
-    reservation.quantityRequested;
+        reservation.quantityRequested;
 
+    // Re-open listing if quantity becomes available again
     if (
-        listing.status === "pendingCompletion" ||
-        listing.status === "fullReserved"
+        listing.quantity > 0
     ) {
-
         listing.status = "available";
         listing.isActive = true;
-
-        };
+    }
 
     await listing.save();
 
