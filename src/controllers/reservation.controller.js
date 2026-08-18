@@ -353,12 +353,11 @@ export const getVendorReservationAnalytics = async (
     res
 ) => {
 
-    const vendor =
-        await findVendorByUserId(req.user.userId);
+    const vendorId = req.user.vendorId;
 
     const analytics =
         await getVendorReservationAnalyticsService(
-                vendor._id
+                vendorId
             );
 
     res.status(200).json({
