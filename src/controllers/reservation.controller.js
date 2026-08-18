@@ -20,7 +20,7 @@ import {
 
 } from "../services/reservations.service.js";
 
-import VendorProfile from "../models/vendorProfile.model.js";
+import VendorProfile from "../models/vendor.model.js";
 
 import {findVendorByUserId} from "../repositories/vendor.repository.js";
 
