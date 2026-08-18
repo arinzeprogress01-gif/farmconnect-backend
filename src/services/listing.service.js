@@ -347,63 +347,85 @@ export const getNearbyListingsService = async (
 
 
 export const updateMyListing = async (
-
     listingId,
-
     userId,
-
     updateData
-
 ) => {
 
     const vendor =
-
         await findVendorByUserId(userId);
 
     if (!vendor) {
-
         throw new AppError(
-
             "Vendor profile not found.",
-
             404
-
         );
-
     }
 
     const listing =
-
         await findListingById(listingId);
 
     if (!listing) {
-
         throw new AppError(
-
             "Listing not found.",
-
             404
-
         );
-
     }
 
     if (
-
-        listing.vendorId.toString()
-
-        !==
-
+        listing.vendorId.toString() !==
         vendor._id.toString()
-
     ) {
-
         throw new ForbiddenError(
-
             "You can only update your own listings."
-
         );
+    }
 
+    /*
+        quantity from the edit form represents
+        the NEW TOTAL quantity of the listing.
+    */
+
+    if (updateData.quantity !== undefined) {
+
+        const newTotalQuantity =
+            Number(updateData.quantity);
+
+        /*
+            Meals already reserved must remain reserved.
+
+            Example:
+
+            totalQuantity = 10
+            quantity      = 6
+
+            4 meals are currently reserved.
+
+            If vendor changes total to 15:
+
+            totalQuantity = 15
+            quantity      = 11
+        */
+
+        const reservedQuantity =
+            listing.totalQuantity -
+            listing.quantity;
+
+        if (
+            newTotalQuantity <
+            reservedQuantity
+        ) {
+            throw new BadRequestError(
+                `Quantity cannot be less than the ${reservedQuantity} meal(s) already reserved.`
+            );
+        }
+
+        updateData.totalQuantity =
+            newTotalQuantity;
+
+        updateData.quantity =
+            newTotalQuantity -
+            reservedQuantity;
     }
 
     const updatedListing =
@@ -438,7 +460,6 @@ export const updateMyListing = async (
     });
 
     return updatedListing;
-
 };
 
 export const deleteMyListing = async (
@@ -589,6 +610,30 @@ export const getListingDetails = async (listingId) => {
 
     }
 
+    // ==============================
+    // RECENT RESERVATIONS
+    // ==============================
+
+    const recentReservations =
+        await Reservation
+            .find({
+                listing: listing._id,
+            })
+            .populate(
+                "user",
+                "fullName"
+            )
+            .sort({
+                createdAt: -1,
+            })
+            .limit(4)
+            .lean();
+
+
+    // ==============================
+    // RESERVATION SUMMARY
+    // ==============================
+
     const reservationSummary =
         await Reservation.aggregate([
 
@@ -673,6 +718,11 @@ export const getListingDetails = async (listingId) => {
 
         ]);
 
+
+    // ==============================
+    // DEFAULT SUMMARY
+    // ==============================
+
     const summary =
         reservationSummary[0] || {
 
@@ -687,6 +737,11 @@ export const getListingDetails = async (listingId) => {
             expired: 0,
 
         };
+
+
+    // ==============================
+    // QUANTITY CALCULATIONS
+    // ==============================
 
     const totalQuantity =
         listing.totalQuantity;
@@ -706,6 +761,11 @@ export const getListingDetails = async (listingId) => {
                 ) * 100
             )
             : 0;
+
+
+    // ==============================
+    // RESPONSE
+    // ==============================
 
     return {
 
@@ -741,6 +801,8 @@ export const getListingDetails = async (listingId) => {
                 summary.expired,
 
         },
+
+        recentReservations,
 
     };
 
