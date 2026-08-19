@@ -138,7 +138,7 @@ export const getVendorReservationAnalytics = async (vendorId) => {
 
     const reservations = await Reservation.find({
         vendor: vendorId,
-        createdAt: {
+        reservedAt: {
             $gte: startOfToday,
             $lte: endOfToday,
         },
