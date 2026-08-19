@@ -3,14 +3,27 @@ import {
     getUserActivities,
 } from "../services/activity.service.js";
 
+import { findVendorByUserId } from "../repositories/vendor.repository.js";
+
 export const getVendorActivity = async (
     req,
     res,
     next
 ) => {
     try {
+        const vendor = await findVendorByUserId(
+            req.user.id
+        );
+
+        if (!vendor) {
+            return res.status(404).json({
+                success: false,
+                message: "Vendor profile not found.",
+            });
+        }
+
         const activities =
-            await getVendorActivities(req.user.id);
+            await getVendorActivities(vendor._id);
 
         res.status(200).json({
             success: true,
@@ -20,6 +33,7 @@ export const getVendorActivity = async (
         next(error);
     }
 };
+
 
 export const getUserActivity = async (
     req,
