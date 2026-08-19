@@ -35,6 +35,7 @@ import generatePickupCode from "../utils/generatePickupCode.js";
 import BadRequestError from "../errors/BadRequestError.js";
 import ForbiddenError from "../errors/ForbiddenError.js";
 import NotFoundError from "../errors/NotFoundError.js";
+import { createActivity } from "../services/activity.service.js";
 
 
 
