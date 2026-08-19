@@ -195,3 +195,43 @@ getCoordinatesFromLocation()  getLocationFromCoordinates()
                     {/* FARMCONNECT AI */} <div> {!showAIAssistant && ( <button type="button" onClick={() => setShowAIAssistant(true)} className="bg-green-normal duration-200 flex gap-2 group hover:scale-105 hover:shadow-xl items-center px-5 py-3 rounded-full shadow-lg text-white transition-all" > <Sparkles className="h-5 w-5" /> <span className="font-semibold text-sm"> FarmConnect AI </span> </button> )} {showAIAssistant && ( <div className="bg-white border border-border-muted flex flex-col h-[600px] overflow-hidden rounded-2xl shadow-2xl w-[380px]"> {/* AI HEADER */} <div className="bg-green-normal flex items-center justify-between px-4 py-4 text-white"> <div className="flex gap-3 items-center"> <div className="bg-white/20 flex h-10 items-center justify-center rounded-full w-10"> <Sparkles className="h-5 w-5" /> </div> <div> <p className="font-semibold"> FarmConnect AI </p> <p className="text-white/80 text-xs"> Your FarmConnect assistant </p> </div> </div> <button type="button" onClick={() => setShowAIAssistant(false)} className="hover:bg-white/20 p-1 rounded-full transition-colors" > <X className="h-5 w-5" /> </button> </div> {/* AI MESSAGES */} <div className="bg-gray-50 flex-1 overflow-y-auto p-4 space-y-4"> {aiMessages.map((message, index) => ( <div key={index} className={flex ${ message.role === 'user' ? 'justify-end' : 'justify-start' }} > <div className={max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${ message.role === 'user' ? 'rounded-br-md bg-green-normal text-white' : 'rounded-bl-md bg-white text-ink shadow-sm' }} > {message.content} </div> </div> ))} </div> {/* AI INPUT */} <form onSubmit={handleAISubmit} className="bg-white border-border-muted border-t p-3" > <div className="flex gap-2 items-center"> <input type="text" value={aiMessage} onChange={(e) => setAiMessage(e.target.value)} placeholder="Ask FarmConnect AI..." className="border border-border-muted flex-1 focus:border-green-normal min-w-0 outline-none px-4 py-3 rounded-xl text-sm transition" /> <button type="submit" disabled={!aiMessage.trim()} className="bg-green-normal disabled:cursor-not-allowed disabled:opacity-50 flex h-11 hover:bg-green-dark items-center justify-center rounded-xl shrink-0 text-white transition w-11" > <Send className="h-4 w-4" /> </button> </div> </form> </div> )} </div>
 
 
+                    DATABASE
+                       │
+          ┌────────────┴────────────┐
+          │                         │
+       Listing                  Reservation
+          │                         │
+          └────────────┬────────────┘
+                       │
+                Activity Service
+                       │
+              ┌────────┴────────┐
+              │                 │
+       Vendor activities   User activities
+              │                 │
+              ▼                 ▼
+       Vendor Dashboard    User Dashboard
+
+       Existing Service
+      │
+      ├── Create Listing
+      │       └── createActivity(...)
+      │
+      ├── Create Reservation
+      │       └── createActivity(...)
+      │
+      ├── Complete Reservation
+      │       └── createActivity(...)
+      │
+      └── Cancel Reservation
+              └── createActivity(...)
+                       │
+                       ▼
+                 Activity Model
+                       │
+             ┌─────────┴─────────┐
+             ▼                   ▼
+      Vendor Activity       User Activity
+             │                   │
+             ▼                   ▼
+       Vendor Ticker          User Ticker

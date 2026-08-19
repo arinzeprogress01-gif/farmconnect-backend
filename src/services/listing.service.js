@@ -16,6 +16,7 @@ import VendorProfile from "../models/vendor.model.js";
 
 
 import generateListingId from "../utils/generateListingId.js";
+import { createActivity } from "../services/activity.service.js";
 
 import {
     createListing,
@@ -165,6 +166,8 @@ export const createNewListing = async (
 
         await createListing({
 
+            
+
             listingId,
 
             vendorId: vendor._id,
@@ -198,6 +201,26 @@ export const createNewListing = async (
             price,
 
         });
+
+    const activityType = value.isFree
+        ? "free_meal_shared"
+        : "listing_created";
+
+    const activityMessage = value.isFree
+        ? `${vendor.businessName} just put up free ${listing.foodName}`
+        : `${vendor.businessName} just added a new ${listing.foodName} listing`;
+
+    await createActivity({
+        type: activityType,
+
+        message: activityMessage,
+
+        audience: "user",
+
+        vendor: vendor._id,
+
+        listing: listing._id,
+    });
     
     await sendNotification({
 

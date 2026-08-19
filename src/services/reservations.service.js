@@ -151,6 +151,26 @@ export const reserveListing = async (
 
     });
 
+    await createActivity({
+        type: "reservation_created",
+
+        message:
+            `${user.fullName} just reserved ${quantityRequested} ${quantityRequested === 1
+                ? "meal"
+                : "meals"
+            } from ${listing.foodName}`,
+
+        audience: "vendor",
+
+        vendor: listing.vendorId,
+
+        user: user._id,
+
+        listing: listing._id,
+
+        reservation: reservation._id,
+    });
+
     // Reduce the remaining quantity.
     listing.quantity -= quantityRequested;
 
@@ -395,6 +415,40 @@ export const cancelReservation = async (
 
     await updateReservation(reservation);
 
+    await createActivity({
+        type: "reservation_cancelled",
+
+        message:
+            `A reservation for ${reservation.foodName} was cancelled`,
+
+        audience: "vendor",
+
+        vendor: reservation.vendor,
+
+        user: reservation.user,
+
+        listing: reservation.listing,
+
+        reservation: reservation._id,
+    });
+
+    await createActivity({
+        type: "reservation_cancelled",
+
+        message:
+            `Your reservation for ${reservation.foodName} was cancelled`,
+
+        audience: "user",
+
+        vendor: reservation.vendor,
+
+        user: reservation.user,
+
+        listing: reservation.listing,
+
+        reservation: reservation._id,
+    });
+
 
     /*
 
@@ -510,6 +564,40 @@ export const completeReservation = async (
     reservation.completedAt = new Date();
 
     await updateReservation(reservation);
+
+    await createActivity({
+        type: "reservation_completed",
+
+        message:
+            `A customer completed their pickup for ${reservation.foodName}`,
+
+        audience: "vendor",
+
+        vendor: reservation.vendor,
+
+        user: reservation.user,
+
+        listing: reservation.listing,
+
+        reservation: reservation._id,
+    });
+
+    await createActivity({
+        type: "reservation_completed",
+
+        message:
+            `You completed your pickup for ${reservation.foodName}`,
+
+        audience: "user",
+
+        vendor: reservation.vendor,
+
+        user: reservation.user,
+
+        listing: reservation.listing,
+
+        reservation: reservation._id,
+    });
 
     const listing = await findListingByObjectId(
         reservation.listing

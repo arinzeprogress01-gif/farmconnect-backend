@@ -18,6 +18,7 @@ import reservationRoutes from "./routes/reservation.routes.js";
 
 import notificationRoutes from "./routes/notification.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
+import activityRoutes from "./routes/activity.routes.js";
 
 import locationRoutes from "./routes/locationRoutes.js";
 import aiRoutes from "./routes/ai.routes.js";
@@ -98,7 +99,7 @@ app.use(
     "/api/mini-farm-bot",
     miniFarmBotRoutes
 );
-
+app.use("/api/activities", activityRoutes);
 app.use(
     "/api-docs",
     swaggerUi.serve,
