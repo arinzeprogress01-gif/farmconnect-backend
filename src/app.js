@@ -59,6 +59,13 @@ app.get("/", (req, res) => {
     });
 });
 
+app.get("/health", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "FarmConnect API is healthy"
+    });
+});
+
 app.use(
     express.static(
         path.join(__dirname, "../public")
