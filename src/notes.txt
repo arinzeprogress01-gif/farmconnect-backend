@@ -235,3 +235,44 @@ getCoordinatesFromLocation()  getLocationFromCoordinates()
              │                   │
              ▼                   ▼
        Vendor Ticker          User Ticker
+
+
+
+                                FARMCONNECT
+                              │
+                ┌─────────────┴─────────────┐
+                │                           │
+             VENDORS                      USERS
+                │                           │
+          Vendor Profile               User Profile
+                │                           │
+          Create Listings             Discover Food
+                │                           │
+          Manage Listings        Search / Filter / Sort
+                │                           │
+          Manage Reservations          View Details
+                │                           │
+          Reservation Actions            Reserve
+                │                           │
+          Analytics                  My Reservations
+                │                           │
+          Notifications             Pickup Code
+                │                           │
+                └───────────┬───────────────┘
+                            │
+                       RESERVATION
+                         ENGINE
+                            │
+                 ┌──────────┼──────────┐
+                 │          │          │
+              Reserved   Completed  Cancelled
+                                      │
+                                   Expired
+                            │
+                 ┌──────────┴──────────┐
+                 │                     │
+            Notifications          Live Activity
+                 │                     │
+                 └──────────┬──────────┘
+                            │
+                       AI ASSISTANT

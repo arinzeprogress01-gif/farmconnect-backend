@@ -10,7 +10,8 @@
     "start": "node src/server.js",
     "d": "nodemon src/server.js",
     "seed-super-admin": "node scripts/seedSuperAdmin.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run" : "node CI-CD/index.js",
+    "test": "node CI-CD/test.js"
   },
   "keywords": [],
   "author": "",
