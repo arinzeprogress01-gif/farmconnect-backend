@@ -3,6 +3,7 @@ import VendorProfile from "../models/vendor.model.js";
 import User from "../models/user.models.js"
 import { findAppUserByUserId } from "./appUser.repository.js";
 import { isValidCoordinates } from "../utils/geoLocation.js";
+import BadRequestError from "../errors/BadRequestError.js"
 
 export const createListing = async (data) => {
 

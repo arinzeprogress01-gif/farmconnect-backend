@@ -9,18 +9,16 @@ import {
 
 } from "../repositories/reservation.repository.js";
 
-import { findUserById } from "../repositories/user.repository.js";
 
 import reservationSchema from "../validators/reservation.validator.js";
+import { AppError } from "errors/AppError.js"
 
 import {
     createReservation,
     findReservationById,
-    findReservationByReservationId,
-    getVendorReservations,
     getUserReservations,
+    getVendorReservations,
     updateReservation,
-    deleteReservation,
     getVendorReservationAnalytics,
 } from "../repositories/reservation.repository.js";
 

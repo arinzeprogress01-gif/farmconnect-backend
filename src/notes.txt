@@ -276,3 +276,41 @@ getCoordinatesFromLocation()  getLocationFromCoordinates()
                  └──────────┬──────────┘
                             │
                        AI ASSISTANT
+
+
+                       PIPELINE 1
+Continuous Integration
+        ↓
+Install + Test
+        ↓
+        ✅
+        
+PIPELINE 2
+Code Quality / Validation
+        ↓
+Lint + tests + dependency checks
+        ↓
+        ✅
+
+PIPELINE 3
+Continuous Deployment
+        ↓
+Build/verify
+        ↓
+Deploy FarmConnect
+        ↓
+Production
+
+git push
+   ↓
+CI
+   ↓
+Tests
+   ↓
+Quality checks
+   ↓
+Build
+   ↓
+Deploy
+   ↓
+Production FarmConnect API
