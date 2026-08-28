@@ -314,3 +314,49 @@ Build
 Deploy
    ↓
 Production FarmConnect API
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+Developer
+   │
+   │ git push
+   ▼
+Pipeline 1
+   │
+   ├── Tests ✅
+   ▼
+Pipeline 2
+   │
+   ├── ESLint ✅
+   ▼
+Pipeline 3
+   │
+   ├── Build/prepare
+   ├── Deploy
+   ▼
+Production FarmConnect API
+
+#######################################
+
+                 GitHub
+                    │
+                 git push
+                    ↓
+        ┌─────────────────────┐
+        │     Pipeline 1      │
+        │   Automated Tests   │
+        └──────────┬──────────┘
+                   ↓
+        ┌─────────────────────┐
+        │     Pipeline 2      │
+        │       ESLint        │
+        └──────────┬──────────┘
+                   ↓
+        ┌─────────────────────┐
+        │     Pipeline 3      │
+        │      Deploy         │
+        └──────────┬──────────┘
+                   ↓
+              Render
+                   ↓
+        FarmConnect Backend
