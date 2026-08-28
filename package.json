@@ -11,7 +11,7 @@
     "d": "nodemon src/server.js",
     "seed-super-admin": "node scripts/seedSuperAdmin.js",
     "run": "node CI-CD/index.js",
-    "test": "node --test tests"
+    "test": "node --test tests/app.test.js"
   },
   "keywords": [],
   "author": "",
