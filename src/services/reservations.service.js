@@ -11,7 +11,7 @@ import {
 
 
 import reservationSchema from "../validators/reservation.validator.js";
-import { AppError } from "errors/AppError.js"
+import { AppError } from "../errors/app.error.js"
 
 import {
     createReservation,

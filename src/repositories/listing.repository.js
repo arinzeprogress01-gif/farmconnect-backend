@@ -106,7 +106,7 @@ export const getMarketListings = async (filters = {}) => {
 
         search,
 
-        vendor,
+        vendorId,
 
         isFree,
 
@@ -126,24 +126,47 @@ export const getMarketListings = async (filters = {}) => {
     };
 
     // Category Filter
+    // Category Filter
     if (category) {
+
+        const escapedCategory = category.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            "\\$&"
+        );
 
         query.category = {
 
-            $regex: new RegExp(`^${category}$`, "i"),
+            $regex: new RegExp(
+                `^${escapedCategory}$`,
+                "i"
+            ),
 
         };
 
     }
 
-    // Pickup Location Filter
+    // Location Filter
     if (location) {
+
+        const escapedLocation = location.replace(
+            /[.*+?^${}()|[\]\\]/g,
+            "\\$&"
+        );
 
         query.pickupLocation = {
 
-            $regex: new RegExp(location, "i"),
+            $regex: new RegExp(
+                escapedLocation,
+                "i"
+            ),
 
         };
+
+    }
+
+    if (vendorId) {
+
+        query.vendorId = vendorId;
 
     }
 
