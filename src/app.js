@@ -26,15 +26,6 @@ import miniFarmBotRoutes from "./routes/miniFarmBot.routes.js";
 import notFound from "./middleware/not-found.middleware.js";
 import errorHandler from "./middleware/error.middleware.js";
 
-import {
-    startReservationExpirationJob,
-} from "./jobs/reservationExpiration.job.js";
-
-import {
-    startListingExpirationJob,
-} from "./jobs/listingExpiration.job.js";
-
-
 const __filename = fileURLToPath(import.meta.url);
 
 const __dirname = path.dirname(__filename);
@@ -121,9 +112,5 @@ app.get("/openapi.json", (req, res) => {
 app.use(notFound);
 
 app.use(errorHandler);
-
-startListingExpirationJob();
-
-startReservationExpirationJob();
 
 export default app;
