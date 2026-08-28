@@ -363,3 +363,17 @@ Production FarmConnect API
 
 
         testing the render deployment Pipeline.. 
+
+                push main
+                    │
+          ┌─────────┴─────────┐
+          ↓                   ↓
+      CI checks          Deployment
+   ┌─────────────┐          waits
+   │ Tests   ✅   │            │
+   │ Lint    ✅   │            │
+   │ Security ✅  │            │
+   └──────┬──────┘            │
+          └──────────┬─────────┘
+                     ↓
+               🚀 Render
