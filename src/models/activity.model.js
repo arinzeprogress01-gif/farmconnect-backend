@@ -23,6 +23,7 @@ const activitySchema = new mongoose.Schema(
         audience: {
             type: String,
             enum: ["user", "vendor", "both"],
+            default: "both",
             required: true,
         },
 

@@ -4,13 +4,11 @@ import User from "../models/user.models.js";
 
 import sendNotification from "../utils/sendNotification.js";
 
-import {createGeoPoint, isValidCoordinates} from "../utils/geoLocation.js";
+import { isValidCoordinates } from "../utils/geoLocation.js";
 
 import {
     createVendor,
     findVendorByUserId,
-    findVendorById,
-    updateVendors,
     getVendorByUserId,
     updateVendorProfile,
     deleteVendorProfile,

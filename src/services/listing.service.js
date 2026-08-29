@@ -10,11 +10,6 @@ import {
     createGeoPoint,
 } from "../utils/geoLocation.js";
 
-import User from "../models/user.models.js";
-
-import VendorProfile from "../models/vendor.model.js";
-
-
 import generateListingId from "../utils/generateListingId.js";
 import { createActivity } from "../services/activity.service.js";
 
@@ -25,7 +20,6 @@ import {
     findVendorByUserId,
     getVendorListings,
     updateListing,
-    getMarketListings,
     findListingsByCategory,
     getMarketListings as getMarketListingsRepo,
     findNearbyListings,
@@ -215,7 +209,7 @@ export const createNewListing = async (
 
         message: activityMessage,
 
-        audience: "user",
+        audience: "both",
 
         vendor: vendor._id,
 

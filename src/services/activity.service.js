@@ -1,15 +1,21 @@
 import Activity from "../models/activity.model.js";
 
+
 export const createActivity = async ({
     vendor = null,
     user = null,
+    listing = null,
+    reservation = null,
     audience,
     type,
     message,
 }) => {
+
     const activity = await Activity.create({
         vendor,
         user,
+        listing,
+        reservation,
         audience,
         type,
         message,
@@ -19,14 +25,27 @@ export const createActivity = async ({
 };
 
 
+const getTwentyFourHoursAgo = () => {
 
-export const getVendorActivities = async (vendorId) => {
+    return new Date(
+        Date.now() - 24 * 60 * 60 * 1000
+    );
+
+};
+
+
+export const getVendorActivities = async () => {
 
     const activities = await Activity.find({
-        vendor: vendorId,
+
         audience: {
             $in: ["vendor", "both"],
         },
+
+        createdAt: {
+            $gte: getTwentyFourHoursAgo(),
+        },
+
     })
         .sort({
             createdAt: -1,
@@ -35,13 +54,20 @@ export const getVendorActivities = async (vendorId) => {
         .lean();
 
     return activities;
+
 };
+
 
 export const getUserActivities = async (userId) => {
 
     const activities = await Activity.find({
+
         audience: {
             $in: ["user", "both"],
+        },
+
+        createdAt: {
+            $gte: getTwentyFourHoursAgo(),
         },
 
         $or: [
@@ -52,6 +78,7 @@ export const getUserActivities = async (userId) => {
                 user: null,
             },
         ],
+
     })
         .sort({
             createdAt: -1,
@@ -60,6 +87,5 @@ export const getUserActivities = async (userId) => {
         .lean();
 
     return activities;
+
 };
-
-
