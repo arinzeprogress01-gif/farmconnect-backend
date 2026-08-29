@@ -33,7 +33,6 @@ coverage
 uploads
 
 # Docker files
-Dockerfile
 .dockerignore
 
 # Temporary files
