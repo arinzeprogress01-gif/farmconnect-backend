@@ -377,3 +377,31 @@ Production FarmConnect API
           └──────────┬─────────┘
                      ↓
                🚀 Render
+
+
+               NEXT:
+
+               FarmConnect
+   │
+   ├── Dockerfile
+   ├── .dockerignore
+   ├── Node.js container
+   ├── Environment variables
+   ├── MongoDB connectivity
+   ├── Firebase
+   └── Render deployment
+
+   Code
+ ↓
+Test
+ ↓
+Lint
+ ↓
+Security
+ ↓
+Build Docker Image
+ ↓
+Run/verify container
+ ↓
+Deploy
+ 🚀
