@@ -442,3 +442,65 @@ ADMIN SYSTEM
 ├── Audit Logs
 │
 └── Platform Configuration
+
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+                    GITHUB
+                       │
+                       ▼
+                  Dockerfile
+                       │
+                       ▼
+              ┌────────────────┐
+              │  Docker Image  │
+              │ FarmConnect    │
+              └───────┬────────┘
+                      │
+                      ▼
+                  GHCR Registry
+                      │
+                      ▼
+              ┌────────────────┐
+              │ Docker         │
+              │ Container      │
+              │                │
+              │ Node/Express   │
+              │ Port 8080      │
+              └───────┬────────┘
+                      │
+             ┌────────┴────────┐
+             │                 │
+             ▼                 ▼
+        Internet          MongoDB Atlas
+                              │
+                              ▼
+                         Persistent Data
+
+
+                         Volume
+  → persistent container storage
+
+Network
+  → container ↔ container communication
+
+Port mapping
+  → outside world ↔ container
+
+Environment variables
+  → configuration/secrets at runtime
+
+Registry
+  → stores your Docker images
+
+Image
+  → packaged application
+
+Container
+  → running image
+
+Layers
+  → cached building blocks of image
+
+Compose
+  → manages multiple containers together
