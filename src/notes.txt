@@ -407,3 +407,38 @@ Deploy
  🚀
 
  setting up dockers on render
+
+ADMIN SYSTEM
+│
+├── Authentication
+│
+├── Authorization
+│   ├── Roles
+│   ├── Permissions
+│   └── Scope
+│
+├── User Management
+│
+├── Vendor Management
+│
+├── Listing Management
+│
+├── Reservation Management
+│
+├── Review Management
+│
+├── Restriction Management
+│
+├── Analytics
+│   ├── Operational
+│   └── Behavioural
+│
+├── Payments
+│
+├── Subscriptions
+│
+├── Reports
+│
+├── Audit Logs
+│
+└── Platform Configuration

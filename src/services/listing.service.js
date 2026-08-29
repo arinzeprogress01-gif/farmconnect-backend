@@ -206,13 +206,25 @@ export const createNewListing = async (
 
     await createActivity({
         type: activityType,
-
         message: activityMessage,
-
-        audience: "both",
-
+        audience: "user",
         vendor: vendor._id,
+        listing: listing._id,
+    });
 
+    const activityType1 = value.isFree
+        ? "free_meal_shared"
+        : "listing_created";
+
+    const activityMessage1 = value.isFree
+        ? `You just put up free ${listing.foodName}`
+        : `You just added a new ${listing.foodName} listing`;
+
+    await createActivity({
+        type: activityType1,
+        message: activityMessage1,
+        audience: "vendor",
+        vendor: vendor._id,
         listing: listing._id,
     });
     
