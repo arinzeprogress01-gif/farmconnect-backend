@@ -23,6 +23,9 @@ import activityRoutes from "./routes/activity.routes.js";
 import locationRoutes from "./routes/locationRoutes.js";
 import aiRoutes from "./routes/ai.routes.js";
 import miniFarmBotRoutes from "./routes/miniFarmBot.routes.js";
+
+import webhookRoutes from "./routes/webhooks.routes.js";
+
 import notFound from "./middleware/not-found.middleware.js";
 import errorHandler from "./middleware/error.middleware.js";
 
@@ -39,7 +42,12 @@ if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
 }
 
-app.use(express.json());
+app.use(express.json({
+    verify: (req, res, buf) => {
+        req.rawBody = buf
+    },
+ }
+));
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -96,6 +104,10 @@ app.use(
 app.use(
     "/api/mini-farm-bot",
     miniFarmBotRoutes
+);
+app.use(
+    "/api/webhooks",
+    webhookRoutes
 );
 app.use("/api/activities", activityRoutes);
 app.use(

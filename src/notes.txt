@@ -504,3 +504,86 @@ Layers
 
 Compose
   → manages multiple containers together
+
+  >>>>>>>>>>>>>>>
+
+  proposed architecture for webhook
+  Frontend / Mobile App
+        │
+        │ 1. Request payment
+        ▼
+FarmConnect Backend
+        │
+        │ 2. Initialize transaction
+        ▼
+Paystack
+        │
+        │ 3. Payment happens
+        ▼
+Paystack Webhook
+        │
+        │ POST /api/v1/payments/webhook
+        ▼
+FarmConnect Backend
+        │
+        ├── Verify Paystack signature
+        ├── Check event
+        ├── Update Payment record
+        ├── Update Subscription
+        ├── Create Activity
+        └── Send notification
+
+        src/
+            ├── models/
+            │   └── payment.model.js
+            │
+            ├── repositories/
+            │   └── payment.repository.js
+            │
+            ├── validators/
+            │   └── payment.validator.js
+            │
+            ├── services/
+            │   └── payment.service.js
+            │
+            ├── controllers/
+            │   └── payment.controller.js
+            │
+            ├── routes/
+            │   └── payment.routes.js
+            │
+            └── webhooks/
+            └── paystack.webhook.js
+
+                             PAYSTACK
+                    │
+                    │ HTTPS POST
+                    ▼
+          /api/webhooks/paystack
+                    │
+                    ▼
+            Verify Signature
+                    │
+                    ▼
+             Identify Event
+                    │
+          ┌─────────┴─────────┐
+          ▼                   ▼
+    charge.success       other events
+          │
+          ▼
+     Idempotency
+          │
+          ▼
+      Save Payment
+          │
+          ▼
+   Update Subscription
+          │
+     ┌────┴─────┐
+     ▼          ▼
+ Activity    Notification
+     │          │
+     └────┬─────┘
+          ▼
+      FarmConnect
