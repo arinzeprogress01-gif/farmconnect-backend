@@ -587,3 +587,26 @@ FarmConnect Backend
      └────┬─────┘
           ▼
       FarmConnect
+
+
+      https://farmconnect-backend-docker.onrender.com/api/webhooks/paystack
+
+         for Idempotency
+
+         Webhook arrives
+               ↓
+         Verify signature
+               ↓
+            Get reference
+               ↓
+    Does payment already exist?
+               │
+            ┌──┴──┐
+            │     │
+           YES    NO
+            │     │
+       Ignore   Process
+            │     │
+            └──┬──┘
+               ↓
+            200 OK
