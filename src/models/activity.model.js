@@ -11,6 +11,11 @@ const activitySchema = new mongoose.Schema(
                 "reservation_created",
                 "reservation_completed",
                 "reservation_cancelled",
+                "payment_success",
+                "payment_failed",
+                "subscription_created",
+                "subscription_cancelled",
+                "subscription_expired",
             ],
         },
 
