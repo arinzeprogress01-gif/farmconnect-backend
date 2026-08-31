@@ -32,6 +32,8 @@ const handleChargeSuccess = async (data) => {
             channel: data.channel,
             metadata: data.metadata,
             paidAt: data.paid_at,
+            user:
+                data.metadata?.userId || null,
         });
 
     console.log(

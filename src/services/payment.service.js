@@ -12,6 +12,7 @@ export const processSuccessfulPayment = async ({
     channel,
     metadata,
     paidAt,
+    user,
 }) => {
 
     const existingPayment =
@@ -46,6 +47,7 @@ export const processSuccessfulPayment = async ({
                 channel,
                 metadata,
                 paidAt,
+                user,
             }
         );
     }
@@ -59,6 +61,7 @@ export const processSuccessfulPayment = async ({
         channel,
         metadata,
         paidAt,
+        user,
         status: "success",
         gateway: "paystack",
     });
