@@ -53,6 +53,8 @@ const handleChargeSuccess = async (data) => {
 
             paidAt: data.paid_at,
 
+            user: data.metadata?.userId,
+
         });
 
 

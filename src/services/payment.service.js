@@ -13,6 +13,7 @@ export const processSuccessfulPayment = async ({
     channel,
     metadata,
     paidAt,
+    user,
 }) => {
 
     const existingPayment =
@@ -49,7 +50,8 @@ export const processSuccessfulPayment = async ({
                     channel,
                     metadata,
                     paidAt,
-                }
+                    user,
+                }    
             );
 
         return {
@@ -60,19 +62,20 @@ export const processSuccessfulPayment = async ({
 
 
     // Completely new payment
-    const payment =
-        await createPayment({
+    const payment = await createPayment({
 
-            reference,
-            amount,
-            currency,
-            channel,
-            metadata,
-            paidAt,
-            status: "success",
-            gateway: "paystack",
+        reference,
+        amount,
+        currency,
+        channel,
+        metadata,
+        paidAt,
 
-        });
+        user,
+        status: "success",
+
+        gateway: "paystack",
+    });
 
     return {
         payment,
