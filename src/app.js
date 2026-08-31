@@ -25,6 +25,8 @@ import aiRoutes from "./routes/ai.routes.js";
 import miniFarmBotRoutes from "./routes/miniFarmBot.routes.js";
 
 import webhookRoutes from "./routes/webhooks.routes.js";
+import paymentRoutes from "./routes/payment.routes.js"
+
 
 import notFound from "./middleware/not-found.middleware.js";
 import errorHandler from "./middleware/error.middleware.js";
@@ -108,6 +110,10 @@ app.use(
 app.use(
     "/api/webhooks",
     webhookRoutes
+);
+app.use(
+    "/api/payments",
+    paymentRoutes
 );
 app.use("/api/activities", activityRoutes);
 app.use(

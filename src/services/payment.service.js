@@ -63,3 +63,46 @@ export const processSuccessfulPayment = async ({
         gateway: "paystack",
     });
 };
+
+export const initializePaystackPayment = async ({
+    email,
+    amount,
+    userId,
+}) => {
+
+    const response = await fetch(
+        "https://api.paystack.co/transaction/initialize",
+        {
+            method: "POST",
+
+            headers: {
+                Authorization:
+                    `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+
+                "Content-Type":
+                    "application/json",
+            },
+
+            body: JSON.stringify({
+                email,
+                amount,
+                currency: "NGN",
+
+                metadata: {
+                    userId,
+                },
+            }),
+        }
+    );
+
+    const result = await response.json();
+
+    if (!response.ok || !result.status) {
+        throw new Error(
+            result.message ||
+            "Failed to initialize Paystack transaction."
+        );
+    }
+
+    return result.data;
+};
