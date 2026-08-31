@@ -610,3 +610,23 @@ FarmConnect Backend
             └──┬──┘
                ↓
             200 OK
+
+
+            websockets journey
+
+            1. WebSocket fundamentals
+2. Socket.IO
+3. Attach Socket.IO to Express/HTTP server
+4. Client connection
+5. Connection/disconnection lifecycle
+6. Authentication
+7. User-specific rooms
+8. Vendor-specific rooms
+9. Broadcast events
+10. Emit FarmConnect activities
+11. Real-time notifications
+12. Replace ActivityTicker polling
+13. Handle reconnection
+14. Prevent unauthorized events
+15. Test locally
+16. Test through Render/Docker

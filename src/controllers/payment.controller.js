@@ -1,5 +1,6 @@
 import {
     initializePaystackPayment,
+    getPaymentHistory,
 } from "../services/payment.service.js";
 
 
@@ -29,6 +30,31 @@ export const initializePayment = async (
                 "Payment initialized successfully.",
 
             data: payment,
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const getMyPaymentHistory = async (
+    req,
+    res,
+    next
+) => {
+
+    try {
+
+        const payments =
+            await getPaymentHistory(
+                req.user._id
+            );
+
+        return res.status(200).json({
+            success: true,
+            message:
+                "Payment history retrieved successfully.",
+            data: payments,
         });
 
     } catch (error) {

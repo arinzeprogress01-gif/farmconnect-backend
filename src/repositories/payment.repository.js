@@ -25,3 +25,14 @@ export const updatePaymentStatus = async (
         }
     );
 };
+
+export const findPaymentsByUser = async (userId) => {
+
+    return await Payment.find({
+        user: userId,
+    })
+        .sort({
+            createdAt: -1,
+        })
+        .lean();
+};

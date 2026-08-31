@@ -2,6 +2,7 @@ import {
     createPayment,
     findPaymentByReference,
     updatePaymentStatus,
+    findPaymentsByUser,
 } from "../repositories/payment.repository.js";
 
 
@@ -108,4 +109,10 @@ export const initializePaystackPayment = async ({
     }
 
     return result.data;
+};
+
+export const getPaymentHistory = async (userId) => {
+
+    return await findPaymentsByUser(userId);
+
 };
