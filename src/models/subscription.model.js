@@ -46,8 +46,10 @@ const subscriptionSchema = new mongoose.Schema(
 
         reference: {
             type: String,
-            default: null,
+            required: true,
+            unique: true,
             index: true,
+            trim: true,
         },
 
         startedAt: {

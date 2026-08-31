@@ -13,13 +13,10 @@ export const processSuccessfulPayment = async ({
     channel,
     metadata,
     paidAt,
-    user,
 }) => {
 
     const existingPayment =
-        await findPaymentByReference(
-            reference
-        );
+        await findPaymentByReference(reference);
 
 
     // Already successfully processed
@@ -32,40 +29,55 @@ export const processSuccessfulPayment = async ({
             `Payment ${reference} already processed.`
         );
 
-        return existingPayment;
+        return {
+            payment: existingPayment,
+            isNewPayment: false,
+        };
     }
 
 
     // Payment exists but wasn't successful
     if (existingPayment) {
 
-        return await updatePaymentStatus(
-            reference,
-            {
-                status: "success",
-                amount,
-                currency,
-                channel,
-                metadata,
-                paidAt,
-                user,
-            }
-        );
+        const payment =
+            await updatePaymentStatus(
+                reference,
+                {
+                    status: "success",
+                    amount,
+                    currency,
+                    channel,
+                    metadata,
+                    paidAt,
+                }
+            );
+
+        return {
+            payment,
+            isNewPayment: true,
+        };
     }
 
 
     // Completely new payment
-    return await createPayment({
-        reference,
-        amount,
-        currency,
-        channel,
-        metadata,
-        paidAt,
-        user,
-        status: "success",
-        gateway: "paystack",
-    });
+    const payment =
+        await createPayment({
+
+            reference,
+            amount,
+            currency,
+            channel,
+            metadata,
+            paidAt,
+            status: "success",
+            gateway: "paystack",
+
+        });
+
+    return {
+        payment,
+        isNewPayment: true,
+    };
 };
 
 export const initializePaystackPayment = async ({

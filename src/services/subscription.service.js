@@ -1,13 +1,15 @@
 import {
     createSubscription,
     findActiveSubscriptionByUser,
+    findSubscriptionByReference,
 } from "../repositories/subscription.repository.js";
 
-import {sendNotification} from "../utils/sendNotification.js";
+import  sendNotification  from "../utils/sendNotification.js";
 
 import {
     createActivity,
 } from "./activity.service.js";
+
 
 export const activateSubscription = async ({
     userId,
@@ -18,16 +20,58 @@ export const activateSubscription = async ({
     expiresAt,
 }) => {
 
+    const existingSubscription =
+        await findSubscriptionByReference(
+            reference
+        );
+
+
+    // Already activated for this payment
+    if (existingSubscription) {
+
+        console.log(
+            `Subscription for payment ${reference} already exists.`
+        );
+
+        return existingSubscription;
+    }
+
+
+    const subscription =
+        await createSubscription({
+
+            user: userId,
+
+            plan,
+
+            status: "active",
+
+            gateway: "paystack",
+
+            payment: paymentId,
+
+            reference,
+
+            startedAt,
+
+            expiresAt,
+
+        });
+
+
     await createActivity({
+
         type: "subscription_created",
 
         message:
-            "A FarmConnect subscription was activated.",
+            "Your FarmConnect Premium subscription is now active.",
 
         audience: "user",
 
         user: userId,
+
     });
+
 
     await sendNotification({
 
@@ -39,25 +83,30 @@ export const activateSubscription = async ({
         message:
             "Your FarmConnect Premium subscription is now active.",
 
-        type: "system",
+        type: "subscription_created",
 
         priority: "medium",
 
+        data: {
+
+            subscriptionId:
+                subscription._id,
+
+            paymentId,
+
+            reference,
+
+            action:
+                "OPEN_SUBSCRIPTION",
+
+        },
+
     });
 
-    return await createSubscription({
-        
-        user: userId,
-        plan,
-        status: "active",
-        gateway: "paystack",
-        payment: paymentId,
-        reference,
-        startedAt,
-        expiresAt,
-    });
 
+    return subscription;
 };
+
 
 export const getUserSubscription = async (
     userId

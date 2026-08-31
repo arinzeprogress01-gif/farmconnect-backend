@@ -33,49 +33,40 @@ const notificationSchema = new mongoose.Schema({
     },
 
     type: {
-
         type: String,
-
         enum: [
-
             "vendor",
 
             "listing",
-
             "listing_created",
-
             "listing_updated",
-
             "listing_cancelled",
-
             "listing_completed",
-
             "listing_expired",
 
             "reservation",
-
             "reservation_created",
-
             "reservation_completed",
-
             "reservation_cancelled",
+
+            "payment_success",
+            "payment_failed",
+
+            "subscription_created",
+            "subscription_cancelled",
+            "subscription_expired",
 
             "vendor_profile_created",
 
             "password_reset",
 
             "system",
-
             "reminder",
-
             "promotion",
-            
             "security",
-
         ],
 
         default: "system",
-
     },
 
     isRead: {
