@@ -630,3 +630,56 @@ FarmConnect Backend
 14. Prevent unauthorized events
 15. Test locally
 16. Test through Render/Docker
+
+                    PORT 8080
+                       │
+                 HTTP SERVER
+                  /         \
+                 /           \
+          Express             Socket.IO
+             │                   │
+       REST requests       Real-time connection
+             │                   │
+             ↓                   ↓
+       /api/listings       socket connection
+       /api/reservations   socket events
+       /api/payments       live updates
+
+                         FarmConnect Service
+                         │
+              ┌──────────┴──────────┐
+              │                     │
+        createActivity()      sendNotification()
+              │                     │
+              └──────────┬──────────┘
+                         │
+                    Socket.IO
+                         │
+                 ┌───────┴───────┐
+                 │               │
+              User A           Vendor B
+                 │               │
+           Instant update   Instant update
+
+           Existing business logic
+        │
+        ├── Payment
+        ├── Subscription
+        ├── Reservation
+        ├── Listing
+        └── Notification
+                │
+                ▼
+        save to MongoDB
+                │
+                ▼
+        sendNotification()//Activity
+                │
+                ▼
+        emitToUser()
+                │
+                ▼
+        Socket.IO user room
+                │
+                ▼
+             Browser

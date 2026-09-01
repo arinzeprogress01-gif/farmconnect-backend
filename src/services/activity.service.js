@@ -1,4 +1,8 @@
 import Activity from "../models/activity.model.js";
+import {
+    emitToUser
+} from "../sockets/socket.events.js";
+import VendorProfile from "../models/vendor.model.js";
 
 
 export const createActivity = async ({
@@ -21,6 +25,18 @@ export const createActivity = async ({
         message,
     });
 
+    emitToUser(
+        user,
+        "activity:new",
+        activity
+    );
+
+    emitToUser(
+        vendor,
+        "activity:new",
+        activity
+    );
+
     return activity;
 };
 
@@ -34,13 +50,23 @@ const getTwentyFourHoursAgo = () => {
 };
 
 
-export const getVendorActivities = async () => {
+export const getVendorActivities = async (userId) => {
+
+    const vendor = await VendorProfile.findOne({
+        userId,
+    });
+
+    if (!vendor) {
+        return [];
+    }
 
     const activities = await Activity.find({
 
         audience: {
             $in: ["vendor", "both"],
         },
+
+        vendor: vendor._id,
 
         createdAt: {
             $gte: getTwentyFourHoursAgo(),
@@ -54,7 +80,6 @@ export const getVendorActivities = async () => {
         .lean();
 
     return activities;
-
 };
 
 

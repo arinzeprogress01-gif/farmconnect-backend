@@ -4,7 +4,9 @@ import {
 import {
     sendPushNotification,
 } from "../services/notifications.service.js";
-
+import {
+    emitToUser
+} from "../sockets/socket.events.js"
 import User from "../models/user.models.js";
 
 
@@ -26,7 +28,7 @@ export default async function sendNotification({
 
     // Save notification
 
-    await createNotification({
+    const notification = await createNotification({
 
         receiver,
 
@@ -41,6 +43,12 @@ export default async function sendNotification({
         data,
 
     });
+
+    emitToUser(
+        receiver,
+        "notification:new",
+        notification
+    );
 
     // Find user
 
