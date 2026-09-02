@@ -13,7 +13,7 @@ export const getVendorActivity = async (
     try {
 
         const activities =
-            await getVendorActivities();
+            await getVendorActivities(req.user.id);
 
         res.status(200).json({
             success: true,

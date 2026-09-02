@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 import { authenticateSocket } from "./socket.auth.js";
-
+import { setSocketIO } from "./socket.events.js";
 export const initializeSocket = (server) => {
 
     const io = new Server(server, {
@@ -8,6 +8,8 @@ export const initializeSocket = (server) => {
             origin: "*",
         },
     });
+
+    setSocketIO(io);
 
     io.use(authenticateSocket);
 
