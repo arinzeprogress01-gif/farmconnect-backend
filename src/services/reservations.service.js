@@ -779,6 +779,40 @@ export const cancelUserReservation = async (
     };
 
     await user.save();
+
+    await createActivity({
+        type: "reservation_cancelled",
+
+        message:
+            `A customer cancelled their reservation for ${reservation.foodName}`,
+
+        audience: "vendor",
+
+        vendor: reservation.vendor,
+
+        user: reservation.user,
+
+        listing: reservation.listing,
+
+        reservation: reservation._id,
+    });
+
+    await createActivity({
+        type: "reservation_cancelled",
+
+        message:
+            `Your reservation for ${reservation.foodName} was cancelled`,
+
+        audience: "user",
+
+        vendor: reservation.vendor,
+
+        user: reservation.user,
+
+        listing: reservation.listing,
+
+        reservation: reservation._id,
+    });
     // Vendor notification
 
     await sendNotification({

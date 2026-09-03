@@ -4,7 +4,6 @@ import {
 } from "../sockets/socket.events.js";
 import VendorProfile from "../models/vendor.model.js";
 
-
 export const createActivity = async ({
     vendor = null,
     user = null,
@@ -25,17 +24,37 @@ export const createActivity = async ({
         message,
     });
 
-    emitToUser(
-        user,
-        "activity:new",
-        activity
-    );
+    // USER audience
+    if (
+        (audience === "user" || audience === "both") &&
+        user
+    ) {
+        emitToUser(
+            user,
+            "activity:new",
+            activity
+        );
+    }
 
-    emitToUser(
-        vendor,
-        "activity:new",
-        activity
-    );
+    // VENDOR audience
+    if (
+        (audience === "vendor" || audience === "both") &&
+        vendor
+    ) {
+        const vendorProfile =
+            await VendorProfile
+                .findById(vendor)
+                .select("userId")
+                .lean();
+
+        if (vendorProfile?.userId) {
+            emitToUser(
+                vendorProfile.userId,
+                "activity:new",
+                activity
+            );
+        }
+    }
 
     return activity;
 };

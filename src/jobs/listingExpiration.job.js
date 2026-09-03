@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import VendorProfile from "../models/vendor.model.js";
-
+import { createActivity } from "../services/activity.service.js";
 import Listing from "../models/listing.model.js";
 
 import {
@@ -41,6 +41,15 @@ export const startListingExpirationJob = () => {
                 listing.isActive = false;
 
                 await listing.save();
+
+                await createActivity({
+    type: "listing_expired",
+    message:
+        `${listing.foodName} has expired and is no longer available.`,
+    audience: "vendor",
+    vendor: listing.vendorId,
+    listing: listing._id,
+});
 
                 const vendor = await VendorProfile.findById(
                     listing.vendorId

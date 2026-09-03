@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import VendorProfile from "../models/vendor.model.js";
-
+import { createActivity } from "../services/activity.service.js";
 import {
     findExpiredReservations,
     updateReservation,
@@ -55,6 +55,28 @@ export const startReservationExpirationJob = () => {
                 await updateReservation(
                     reservation
                 );
+
+                await createActivity({
+    type: "reservation_expired",
+    message:
+        `Your reservation for ${reservation.foodName} has expired.`,
+    audience: "user",
+    vendor: reservation.vendor,
+    user: reservation.user,
+    listing: reservation.listing,
+    reservation: reservation._id,
+});
+
+await createActivity({
+    type: "reservation_expired",
+    message:
+        `A reservation for ${reservation.foodName} has expired and the quantity has been restored.`,
+    audience: "vendor",
+    vendor: reservation.vendor,
+    user: reservation.user,
+    listing: reservation.listing,
+    reservation: reservation._id,
+});
 
                 // Notify User
                 await sendNotification({

@@ -463,6 +463,18 @@ export const updateMyListing = async (
             updateData
         );
 
+    await createActivity({
+        type: "listing_created",
+        message:
+            `You just updated ${updatedListing.foodName}`,
+
+        audience: "vendor",
+
+        vendor: vendor._id,
+
+        listing: updatedListing._id,
+    });
+
     await sendNotification({
 
         receiver: userId,
@@ -560,6 +572,19 @@ export const deleteMyListing = async (
 
             }
         );
+
+    await createActivity({
+        type: "listing_cancelled",
+
+        message:
+            `You removed ${cancelledListing.foodName} from the marketplace.`,
+
+        audience: "vendor",
+
+        vendor: vendor._id,
+
+        listing: cancelledListing._id,
+    });
 
     await sendNotification({
 
