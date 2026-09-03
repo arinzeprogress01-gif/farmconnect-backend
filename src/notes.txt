@@ -707,3 +707,20 @@ Render
                    
             MongoDB Atlas
             └── Permanent application data
+
+            | Command/flag                      | Function                                                                                                                                                       |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm install redis`               | Normal installation; resolves dependencies and updates `package.json` + lockfile.                                                                              |
+| `npm install redis --verbose`     | Same install, but prints detailed npm/network/dependency activity for diagnosing hangs.                                                                        |
+| `--no-audit`                      | Prevents npm from running the vulnerability audit during that install.                                                                                         |
+| `--no-fund`                       | Prevents npm from displaying funding information.                                                                                                              |
+| `--legacy-peer-deps`              | Makes npm use the older peer-dependency resolution behavior. Useful for actual `ERESOLVE` peer conflicts; **not a general "faster install" switch**.           |
+| `npm cache verify`                | Checks/validates npm's local cache and cleans invalid cached content.                                                                                          |
+| `npm ls redis`                    | Checks whether Redis is actually installed and recognized by the project. `extraneous` means it exists in `node_modules` but isn't declared in `package.json`. |
+| `npm install --package-lock-only` | Updates the lockfile without installing packages into `node_modules`.                                                                                          |
+| `--package-lock=false`            | Prevents npm from modifying the lockfile during that command.                                                                                                  |
+| `npm link redis`                  | **Not for this situation.** Creates a symlink to a locally linked package; don't use it for FarmConnect's normal dependency.                                   |
+| `npm audit`                       | Explicitly checks dependency vulnerabilities.                                                                                                                  |
+| `npm audit fix`                   | Attempts non-breaking vulnerability fixes.                                                                                                                     |
+| `npm audit fix --force`           | Can make breaking dependency changes; **don't use casually**.                                                                                                  |
+| `npm run lint`                    | Your project's code/lint validation. It is **not a replacement for `npm audit`**; they check different things.                                                 |
