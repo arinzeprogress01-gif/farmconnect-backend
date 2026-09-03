@@ -1,6 +1,7 @@
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNzE5MTFjOWFhMWNhM2RiNDAzZGViYSIsInJvbGUiOiJ2ZW5kb3IiLCJwZXJtaXNzaW9ucyI6eyJhZG1pbiI6ZmFsc2V9LCJpc1N1cGVyQWRtaW4iOmZhbHNlLCJpYXQiOjE3ODgyODQzMTksImV4cCI6MTc4ODg4OTExOX0.sfW9vg2az-s4P1WfTrhptmp-L9uFVt1QeOSOquJva_8";
+import getToken from "../../utils/jwt.utils.js"
+const token = getToken();
 
-const socket = io({
+const socket = io("https://farmconnect-backend-docker.onrender.com", {
     auth: {
         token
     }
