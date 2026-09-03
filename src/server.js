@@ -38,7 +38,7 @@ const startServer = async () => {
     await setRedisValue(
         "farmconnect:ttl-test",
         "This will expire",
-        3
+        60
     );
 
     console.log(
