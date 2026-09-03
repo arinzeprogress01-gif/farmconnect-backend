@@ -30,6 +30,10 @@ import BadRequestError from "../errors/BadRequestError.js";
 import ForbiddenError from "../errors/ForbiddenError.js";
 import { AppError } from "../errors/app.error.js";
 import NotFoundError from "../errors/NotFoundError.js";
+import {
+    getRedisJson,
+    setRedisJson,
+} from "../services/redis.service.js";
 
 export const createNewListing = async (
 
@@ -301,31 +305,42 @@ export const getMarketLists = async (query) => {
     if (query.category) {
 
         const validCategory = FOOD_CATEGORIES.find(
-
             item =>
-
                 item.toLowerCase() ===
-
                 query.category.toLowerCase()
-
         );
 
         if (!validCategory) {
-
             throw new BadRequestError(
-
                 "Invalid food category."
-
             );
-
         }
 
         query.category = validCategory;
-
     }
 
-    return await getMarketListingsRepo(query);
+    const cacheKey = `farmconnect:market-listings:${JSON.stringify(query)}`;
 
+    const cachedListings = await getRedisJson(cacheKey);
+
+    if (cachedListings) {
+
+        console.log("Redis cache HIT:", cacheKey);
+
+        return cachedListings;
+    }
+
+    console.log("Redis cache MISS:", cacheKey);
+
+    const listings = await getMarketListingsRepo(query);
+
+    await setRedisJson(
+        cacheKey,
+        listings,
+        60
+    );
+
+    return listings;
 };
 
 export const getNearbyListingsService = async (
