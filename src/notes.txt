@@ -683,3 +683,27 @@ FarmConnect Backend
                 │
                 ▼
              Browser
+
+             GitHub
+   │
+   ▼
+Render
+ ┌─────────────────────────────┐
+ │ FarmConnect API             │
+ │ Docker                      │
+ │ Node + Express              │
+ └──────────────┬──────────────┘
+                │
+        REDIS_URL │
+                ▼
+      Render Key Value
+      (Redis-compatible)
+                │
+                ├── Cache
+                ├── Rate limiting
+                ├── Temporary data
+                ├── Pub/Sub / scaling later
+                └── Queues later
+                   
+            MongoDB Atlas
+            └── Permanent application data
