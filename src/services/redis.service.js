@@ -22,6 +22,10 @@ export const getRedisTimeToLive = async (key) => {
     return await redisClient.ttl(key);
 };
 
+export const incrementRedisValue = async (key) => {
+    return await redisClient.incr(key);
+};
+
 export const setRedisJson = async (
     key,
     value,

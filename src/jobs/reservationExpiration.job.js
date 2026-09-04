@@ -11,6 +11,7 @@ import {
 } from "../repositories/listing.repository.js";
 
 import sendNotification from "../utils/sendNotification.js";
+import {invalidateMarketListingsCache} from "../utils/cacheInvalidation.js";
 
 export const startReservationExpirationJob = () => {
 
@@ -49,6 +50,7 @@ export const startReservationExpirationJob = () => {
 
                 }
                 await listing.save();
+                await invalidateMarketListingsCache();
 
                 reservation.status = "expired";
 

@@ -35,6 +35,10 @@ import ForbiddenError from "../errors/ForbiddenError.js";
 import NotFoundError from "../errors/NotFoundError.js";
 import { createActivity } from "../services/activity.service.js";
 
+import {
+    invalidateMarketListingsCache,
+} from "../utils/cacheInvalidation.js";
+
 
 
 export const reserveListing = async (
@@ -185,6 +189,7 @@ export const reserveListing = async (
     }
 
     await listing.save();
+    await invalidateMarketListingsCache();
 
     /*
         Store Notification
@@ -408,6 +413,8 @@ export const cancelReservation = async (
 
     await listing.save();
 
+    await invalidateMarketListingsCache();
+
     reservation.status = "cancelled";
 
     reservation.cancellationReason = cancellationReason;
@@ -563,6 +570,7 @@ export const completeReservation = async (
     reservation.completedAt = new Date();
 
     await updateReservation(reservation);
+    
 
     await createActivity({
         type: "reservation_completed",
@@ -622,8 +630,9 @@ export const completeReservation = async (
         listing.isActive = false;
 
         await listing.save();
-
+        await invalidateMarketListingsCache();
     }
+    
     /*
 
         Store Notification
@@ -745,6 +754,7 @@ export const cancelUserReservation = async (
     }
 
     await listing.save();
+    await invalidateMarketListingsCache();
 
     const updatedReservation =
 
@@ -971,6 +981,7 @@ export const updateListingReservationStatus = async (
         listing.isActive = true;
 
         await listing.save();
+        await invalidateMarketListingsCache();
 
         return listing;
     }
@@ -1001,6 +1012,7 @@ export const updateListingReservationStatus = async (
     }
 
     await listing.save();
+    await invalidateMarketListingsCache();
 
     return listing;
 };

@@ -2,6 +2,7 @@ import cron from "node-cron";
 import VendorProfile from "../models/vendor.model.js";
 import { createActivity } from "../services/activity.service.js";
 import Listing from "../models/listing.model.js";
+import {invalidateMarketListingsCache} from "../utils/cacheInvalidation.js";
 
 import {
     createNotification,
@@ -41,6 +42,7 @@ export const startListingExpirationJob = () => {
                 listing.isActive = false;
 
                 await listing.save();
+                await invalidateMarketListingsCache();
 
                 await createActivity({
     type: "listing_expired",

@@ -30,10 +30,11 @@ import BadRequestError from "../errors/BadRequestError.js";
 import ForbiddenError from "../errors/ForbiddenError.js";
 import { AppError } from "../errors/app.error.js";
 import NotFoundError from "../errors/NotFoundError.js";
+
+import cache from "../utils/cache.js";
 import {
-    getRedisJson,
-    setRedisJson,
-} from "../services/redis.service.js";
+    invalidateMarketListingsCache,
+} from "../utils/cacheInvalidation.js";
 
 export const createNewListing = async (
 
@@ -200,6 +201,8 @@ export const createNewListing = async (
 
         });
 
+        await invalidateMarketListingsCache();
+
     const activityType = value.isFree
         ? "free_meal_shared"
         : "listing_created";
@@ -311,33 +314,45 @@ export const getMarketLists = async (query) => {
         );
 
         if (!validCategory) {
+
             throw new BadRequestError(
                 "Invalid food category."
             );
+
         }
 
         query.category = validCategory;
     }
 
-    const cacheKey = `farmconnect:market-listings:${JSON.stringify(query)}`;
+    const cacheVersion =
+        await cache.getOrSetVersion(
+            "market-listings"
+        );
 
-    const cachedListings = await getRedisJson(cacheKey);
+    const cacheIdentifier =
+        `${cacheVersion}:${JSON.stringify(query)}`;
+
+    const cachedListings = await cache.get(
+        "market-listings",
+        cacheIdentifier
+    );
 
     if (cachedListings) {
 
-        console.log("Redis cache HIT:", cacheKey);
+        console.log("Redis cache HIT");
 
         return cachedListings;
     }
 
-    console.log("Redis cache MISS:", cacheKey);
+    console.log("Redis cache MISS");
 
     const listings = await getMarketListingsRepo(query);
 
-    await setRedisJson(
-        cacheKey,
+    await cache.set(
+        "market-listings",
+        cacheIdentifier,
         listings,
-        60
+        300
     );
 
     return listings;
@@ -478,6 +493,8 @@ export const updateMyListing = async (
             updateData
         );
 
+    await invalidateMarketListingsCache();
+
     await createActivity({
         type: "listing_created",
         message:
@@ -587,6 +604,8 @@ export const deleteMyListing = async (
 
             }
         );
+
+    await invalidateMarketListingsCache();
 
     await createActivity({
         type: "listing_cancelled",

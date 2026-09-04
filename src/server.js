@@ -17,15 +17,10 @@ import {
 import
     {initializeSocket}
     from "./sockets/socket.server.js";
-import { setTimeout as delay } from "node:timers/promises";
+
 
 import redisClient from "./config/redis.config.js";
-import {
-    setRedisValue,
-    getRedisValue,
-    getRedisTimeToLive,
-    deleteRedisValue,
-} from "./services/redis.service.js";
+
 const PORT = process.env.PORT || 5000;
 
 
@@ -35,44 +30,6 @@ const startServer = async () => {
 
     await redisClient.connect();
 
-    await setRedisValue(
-        "farmconnect:ttl-test",
-        "This will expire",
-        60
-    );
-
-    console.log(
-        "Initial TTL:",
-        await getRedisTimeToLive("farmconnect:ttl-test"),
-        "seconds"
-    );
-
-    await delay(1000);
-
-    console.log(
-        "TTL after 3 seconds:",
-        await getRedisTimeToLive("farmconnect:ttl-test"),
-        "seconds"
-    );
-
-    await delay(1000);
-
-    console.log(
-        "TTL after another 4 seconds:",
-        await getRedisTimeToLive("farmconnect:ttl-test"),
-        "seconds"
-    );
-
-    console.log(
-        "Value:",
-        await getRedisValue("farmconnect:ttl-test")
-    );
-await delay(1000);
-
-console.log(
-    "Final value:",
-    await getRedisValue("farmconnect:ttl-test")
-);
     startListingExpirationJob();
     startReservationExpirationJob();
 
