@@ -724,3 +724,60 @@ Render
 | `npm audit fix`                   | Attempts non-breaking vulnerability fixes.                                                                                                                     |
 | `npm audit fix --force`           | Can make breaking dependency changes; **don't use casually**.                                                                                                  |
 | `npm run lint`                    | Your project's code/lint validation. It is **not a replacement for `npm audit`**; they check different things.                                                 |
+
+caching pattern // just example
+Marketplace listings       → 2–5 minutes
+Vendor profile             → 10 minutes
+Categories                 → 1 hour
+Verification code          → 5 minutes
+Password reset             → 15 minutes
+Rate-limit counter         → 15 minutes
+Session/temporary state    → depends on purpose
+
+User opens marketplace
+        ↓
+Redis cache = 5 minutes
+        ↓
+User browses
+        ↓
+5 minutes passes
+        ↓
+Cache expires
+        ↓
+Next marketplace request
+        ↓
+MongoDB gets fresh listings
+        ↓
+Redis stores fresh copy
+        ↓
+Another 5 minutes ETC
+
+DEVELOPMENT TRACK:
+
+LOCAL
+  ↓
+Redis connection
+  ↓
+Time To Live
+  ↓
+Caching
+  ↓
+Cache invalidation
+  ↓
+Rate limiting
+  ↓
+Temporary data
+  ↓
+Queues
+  ↓
+Publish / Subscribe
+  ↓
+Failure handling
+  ↓
+Frontend integration
+  ↓
+GitHub
+  ↓
+Render
+  ↓
+Production Redis
