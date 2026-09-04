@@ -16,43 +16,50 @@ export const initializeSocket = (server) => {
 
     io.on("connection", (socket) => {
 
-        console.log(
-            `🔌 Authenticated client connected: ${socket.id}`
-        );
+        console.log("=================================");
+        console.log("🔌 SOCKET CONNECTED");
+        console.log("Socket ID:", socket.id);
+        console.log("Socket User:", socket.user);
+        console.log("User ID:", socket.user.id);
+        console.log("User Role:", socket.user.role);
+        console.log("=================================");
 
-        console.log(
-            `👤 User: ${socket.user.id}`
-        );
 
-        const userRoom =
-            `user:${socket.user.id}`;
+        const userRoom = `user:${socket.user.id}`;
 
         socket.join(userRoom);
 
-        console.log(
-            `🏠 Joined room: ${userRoom}`
-        );
+        console.log("🏠 Joined User Room:", userRoom);
 
 
-        // Join role-specific room
         if (socket.user.role) {
 
-            const roleRoom =
-                `role:${socket.user.role}`;
+            const roleRoom = `role:${socket.user.role}`;
 
             socket.join(roleRoom);
 
+            console.log("🏠 Joined Role Room:", roleRoom);
+
             console.log(
-                `🏠 Joined role room: ${roleRoom}`
+                "📡 Role Room Members:",
+                io.sockets.adapter.rooms.get(roleRoom)?.size || 0
             );
         }
 
 
-        socket.on("disconnect", () => {
+        console.log(
+            "📡 User Room Members:",
+            io.sockets.adapter.rooms.get(userRoom)?.size || 0
+        );
 
-            console.log(
-                `🔌 Client disconnected: ${socket.id}`
-            );
+
+        socket.on("disconnect", (reason) => {
+
+            console.log("=================================");
+            console.log("🔌 SOCKET DISCONNECTED");
+            console.log("Socket ID:", socket.id);
+            console.log("Reason:", reason);
+            console.log("=================================");
 
         });
 
