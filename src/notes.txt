@@ -781,3 +781,45 @@ GitHub
 Render
   ↓
 Production Redis
+
+USER
+  │
+  │ POST /reservations
+  ▼
+reserveListing()
+  │
+  ├── create reservation in MongoDB
+  ├── reduce listing quantity
+  ├── save listing
+  ├── invalidate Redis cache
+  ├── create activity
+  ├── send notifications
+  │
+  └── emit "reservation:new"
+             │
+             ▼
+       vendor's socket room
+             │
+             ▼
+       Vendor Dashboard
+       Vendor Reservations
+
+       VENDOR
+  │
+  │ POST /listings
+  ▼
+createNewListing()
+  │
+  ├── create listing in MongoDB
+  ├── invalidate Redis cache
+  ├── create activity
+  ├── send notification
+  │
+  └── emit "listing:new"
+             │
+             ▼
+       authenticated USER sockets
+             │
+             ▼
+       User Dashboard
+       User Listings

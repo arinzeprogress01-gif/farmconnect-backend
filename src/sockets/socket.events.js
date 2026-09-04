@@ -30,3 +30,31 @@ export const emitToUser = (
         .to(`user:${userId}`)
         .emit(event, data);
 };
+
+
+export const emitToRole = (
+    role,
+    event,
+    data
+) => {
+
+    if (!io) {
+        console.warn(
+            "Socket.IO is not initialized."
+        );
+
+        return;
+    }
+
+    if (!role) {
+        console.warn(
+            `Cannot emit ${event}: role is missing.`
+        );
+
+        return;
+    }
+
+    io
+        .to(`role:${role}`)
+        .emit(event, data);
+};

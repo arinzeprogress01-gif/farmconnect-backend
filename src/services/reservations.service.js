@@ -21,6 +21,7 @@ import {
     updateReservation,
     getVendorReservationAnalytics,
 } from "../repositories/reservation.repository.js";
+import VendorProfile from "../models/vendor.model.js";
 
 import {
     findListingById,
@@ -38,6 +39,7 @@ import { createActivity } from "../services/activity.service.js";
 import {
     invalidateMarketListingsCache,
 } from "../utils/cacheInvalidation.js";
+import { emitToUser } from "../sockets/socket.events.js";
 
 
 
@@ -190,6 +192,22 @@ export const reserveListing = async (
 
     await listing.save();
     await invalidateMarketListingsCache();
+
+
+    // Real-time vendor dashboard update
+    const vendorProfile = await VendorProfile.findById(
+        listing.vendorId
+    ).select("userId");
+
+    if (vendorProfile?.userId) {
+
+        emitToUser(
+            vendorProfile.userId,
+            "reservation:new",
+            reservation
+        );
+
+    }
 
     /*
         Store Notification

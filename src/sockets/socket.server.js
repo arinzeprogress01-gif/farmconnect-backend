@@ -1,6 +1,7 @@
 import { Server } from "socket.io";
 import { authenticateSocket } from "./socket.auth.js";
 import { setSocketIO } from "./socket.events.js";
+
 export const initializeSocket = (server) => {
 
     const io = new Server(server, {
@@ -31,6 +32,21 @@ export const initializeSocket = (server) => {
         console.log(
             `🏠 Joined room: ${userRoom}`
         );
+
+
+        // Join role-specific room
+        if (socket.user.role) {
+
+            const roleRoom =
+                `role:${socket.user.role}`;
+
+            socket.join(roleRoom);
+
+            console.log(
+                `🏠 Joined role room: ${roleRoom}`
+            );
+        }
+
 
         socket.on("disconnect", () => {
 

@@ -22,9 +22,6 @@ import {
 
 import VendorProfile from "../models/vendor.model.js";
 
-import {findVendorByUserId} from "../repositories/vendor.repository.js";
-
-
 
 export const reserveFood = async (
 

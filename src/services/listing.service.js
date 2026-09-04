@@ -36,6 +36,8 @@ import {
     invalidateMarketListingsCache,
 } from "../utils/cacheInvalidation.js";
 
+import { emitToRole } from "../sockets/socket.events.js";
+
 export const createNewListing = async (
 
     userId,
@@ -201,7 +203,15 @@ export const createNewListing = async (
 
         });
 
-        await invalidateMarketListingsCache();
+    await invalidateMarketListingsCache();
+    
+    emitToRole(
+    "user",
+    "listing:new",
+    {
+        listingId: listing._id,
+    }
+);
 
     const activityType = value.isFree
         ? "free_meal_shared"
