@@ -823,3 +823,24 @@ createNewListing()
              ▼
        User Dashboard
        User Listings
+
+
+
+       setup-socket
+       Vendor creates listing
+        ↓
+Backend saves listing
+        ↓
+Redis marketplace cache invalidated
+        ↓
+emitToRole("user", "listing:new", ...)
+        ↓
+Connected user frontend receives event
+        ↓
+Frontend calls GET /listings/market-list
+        ↓
+Backend returns fresh listings
+        ↓
+setListings(...)
+        ↓
+New listing appears without refresh
