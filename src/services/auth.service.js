@@ -61,7 +61,7 @@ import {
 } from "./email.service.js";
 
 import {
-    getFailedLoginAttempts,
+    //getFailedLoginAttempts,
     incrementFailedLoginAttempts,
     startLoginCooldown,
     isLoginOnCooldown,

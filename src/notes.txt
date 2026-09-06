@@ -1133,3 +1133,34 @@ Redis
                          Reset Password
                                ↓
                          Normal account
+
+                         /////////////////////
+
+                                           FARMCONNECT API
+                       │
+                       ↓
+                     QUEUE
+                       │
+                 ┌─────┴─────┐
+                 ↓           ↓
+              Worker       Worker
+                 │           │
+                 ↓           ↓
+          Notification     Email
+                 │
+                 ↓
+              SUCCESS
+                 │
+                 └──────────────→ DONE
+
+                    or
+
+                   FAILURE
+                      ↓
+                    RETRY
+                      ↓
+                    RETRY
+                      ↓
+                Max attempts
+                      ↓
+              Failed / DLQ
