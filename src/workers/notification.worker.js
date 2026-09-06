@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
 import IORedis from "ioredis";
-
+import "dotenv/config";
 const connection = new IORedis(process.env.REDIS_URL, {
     maxRetriesPerRequest: null,
 });
