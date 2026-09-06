@@ -29,9 +29,6 @@ import {
 import { UnauthorizedError } from "../errors/unauthorized-error.js";
 import BadRequestError from "../errors/BadRequestError.js";
 
-
-import { AppError } from "../errors/app.error.js";
-
 import { ConflictError } from "../errors/conflict-error.js";
 
 import { hashPassword, comparePassword } from "../utils/password.utils.js";
@@ -62,6 +59,20 @@ import {
     sendResetEmail,
 
 } from "./email.service.js";
+
+import {
+    getFailedLoginAttempts,
+    incrementFailedLoginAttempts,
+    startLoginCooldown,
+    isLoginOnCooldown,
+    getLoginCooldown,
+    resetFailedLoginAttempts,
+} from "../utils/loginSecurity.js";
+import {
+    flagAccount,
+    lockAccount,
+    unlockAccount,
+} from "../utils/accountSecurity.js";
 
 
 
@@ -162,7 +173,21 @@ export const login = async ({ email, password }) => {
 
     if (!user) {
         throw new UnauthorizedError("User Does Not Exist");
-    };
+    }
+
+    if (user.accountLocked) {
+        throw new UnauthorizedError(
+            "Your account is locked. Please use Forgot Password to revalidate your account."
+        );
+    }
+
+    if (await isLoginOnCooldown(user._id)) {
+        const retryAfter = await getLoginCooldown(user._id);
+
+        throw new UnauthorizedError(
+            `Too many failed login attempts. Please try again in ${retryAfter} seconds.`
+        );
+    }
 
     if(!email) {
         throw new BadRequestError("Email is required");
@@ -174,8 +199,48 @@ export const login = async ({ email, password }) => {
     );
 
     if (!passwordMatch) {
+        const failedAttempts = await incrementFailedLoginAttempts(
+            user._id
+        );
+
+        if (failedAttempts === 10) {
+            await startLoginCooldown(user._id);
+
+            throw new UnauthorizedError(
+                "Too many failed login attempts. Your account is temporarily locked for 15 minutes."
+            );
+        }
+
+        if (failedAttempts > 10 && failedAttempts <= 20) {
+            throw new UnauthorizedError(
+                `Invalid password. Warning: ${20 - failedAttempts} failed attempts remaining before your account is flagged.`
+            );
+        }
+
+        if (failedAttempts === 21) {
+            await flagAccount(user._id)
+            throw new UnauthorizedError(
+                "Your account has been flagged due to repeated failed login attempts. You have 4 more failed attempts before your account is locked."
+            );
+        }
+
+        if (failedAttempts > 21 && failedAttempts < 25) {
+            throw new UnauthorizedError(
+                `Invalid password. Your account is flagged. ${25 - failedAttempts} failed attempts remaining before your account is locked.`
+            );
+        }
+
+        if (failedAttempts >= 25) {
+            await lockAccount(user._id)
+            throw new UnauthorizedError(
+                "Your account has been locked due to repeated failed login attempts. Please use Forgot Password to revalidate your account."
+            );
+        }
+
         throw new UnauthorizedError("Invalid password.");
-    }
+    };
+
+    await resetFailedLoginAttempts(user._id)
 
     const token = generateToken({
         id: user._id,
@@ -486,8 +551,12 @@ export const verifyOtp = async (
 
             "Invalid OTP."
 
-);
+        );
 
+    };
+    if (user.accountLocked || user.accountFlagged) {
+        await unlockAccount(user._id);
+        await resetFailedLoginAttempts(user._id);
     }
 
         await markPasswordResetVerified(

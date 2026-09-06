@@ -24,15 +24,22 @@ import { validate} from "../middleware/validate.middleware.js";
 import {
     registerSchema,
     loginSchema,
-    forgotPasswordSchema,
 } from "../validators/auth.validator.js";
 
-const router = express.Router();
+import {
+    registerRateLimiter,
+    loginRateLimiter,
+    forgotPasswordRateLimiter,
+    verifyOtpRateLimiter,
+    resetPasswordRateLimiter,
+} from "../utils/ipRateLimiters.js";
 
+const router = express.Router();
 
 router.post(
     "/register",
     validate(registerSchema),
+    registerRateLimiter,
     registerUser
 );
 
@@ -40,6 +47,7 @@ router.post(
 router.post(
     "/login",
     validate(loginSchema),
+    loginRateLimiter,
     loginUser
 );
 
@@ -53,6 +61,8 @@ router.post(
 
     "/forgot-password",
 
+    forgotPasswordRateLimiter,
+
     forgotPasswordUser
 
 );
@@ -61,6 +71,8 @@ router.post(
 
     "/verify-otp",
 
+    verifyOtpRateLimiter,
+
     verifyUserOtp
 
 );
@@ -68,6 +80,9 @@ router.post(
 router.post(
 
     "/reset-password",
+
+    resetPasswordRateLimiter,
+
 
     resetUserPassword
 

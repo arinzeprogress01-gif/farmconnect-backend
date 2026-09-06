@@ -67,6 +67,15 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    accountFlagged: {
+  type: Boolean,
+  default: false,
+},
+
+accountLocked: {
+  type: Boolean,
+  default: false,
+},
     permissions: {
 
       admin: {

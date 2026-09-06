@@ -844,3 +844,292 @@ Backend returns fresh listings
 setListings(...)
         ↓
 New listing appears without refresh
+
+                     CLIENT
+                       │
+                       │ HTTP Request
+                       ▼
+              ┌─────────────────┐
+              │     Express     │
+              │     Server      │
+              └────────┬────────┘
+                       │
+                       ▼
+              ┌─────────────────┐
+              │ Rate Limiter    │
+              └────────┬────────┘
+                       │
+                ┌──────┴──────┐
+                │             │
+              Allowed       Blocked
+                │             │
+                ▼             ▼
+             Continue        429
+                │
+                ▼
+          Authentication
+                │
+                ▼
+           Validation
+                │
+                ▼
+            Controller
+                │
+                ▼
+             Service
+                │
+        ┌───────┴────────┐
+        ▼                ▼
+      Redis
+      |
+     Request
+        │
+        │
+        │ check/increment
+        ▼
+        Redis
+        │
+        ┌─────┴─────┐
+        │           │
+Under limit   Over limit
+        │           │
+        ▼           ▼
+     429           MongoDB
+
+     AUTH ROUTES
+│
+├── POST /register
+│      └── Rate limited
+│
+├── POST /login
+│      └── Strict rate limit
+│
+├── POST /forgot-password
+│      └── Very strict rate limit
+│
+├── POST /verify-otp
+│      └── Rate limited
+│      └── + existing 5 OTP attempts
+│
+├── POST /reset-password
+│      └── Rate limited
+│      └── + OTP verification requirement
+│
+├── GET /current-user
+│      └── No special rate limit initially
+│
+└── POST /logout
+       └── No special rate limit initially
+
+       SECURITY STATE PROPOSITION
+       LOGIN ATTEMPTS
+      │
+      ▼
+10 failed attempts
+      │
+      ▼
+15-minute cooldown
+      │
+      ▼
+Counter resets / next window
+      │
+      ▼
+10 more failed attempts
+      │
+      ▼
+ACCOUNT FLAGGED ⚠️
+      │
+      ▼
+Warning:
+"5 more failed attempts will lock your account.
+Please use Forgot Password."
+      │
+      ▼
+5 more failed attempts
+      │
+      ▼
+ACCOUNT LOCKED 🔒
+
+
+
+
+
+
+
+
+Forgot Password
+      │
+      ▼
+OTP generated
+      │
+      ▼
+User enters OTP
+      │
+      ├── Correct
+      │     ↓
+      │   verified
+      │
+      └── Wrong
+            ↓
+       failed attempt
+            │
+            ▼
+       5 failures
+            │
+            ▼
+       15-minute cooldown
+            │
+            ▼
+       another 5 failures
+            │
+            ▼
+       ACCOUNT FLAGGED ⚠️
+
+
+
+       FINAL Review
+
+                           LOGIN REQUEST
+                         │
+                         ▼
+                ┌─────────────────┐
+                │ IP Rate Limiter │
+                └────────┬────────┘
+                         │
+                  within limit?
+                    │          │
+                   YES         NO
+                    │           │
+                    ▼           ▼
+             Auth Service      429
+                    │
+                    ▼
+            Is account locked?
+               │          │
+              YES         NO
+               │           │
+               ▼           ▼
+             Reject    Check password
+                           │
+                     ┌─────┴─────┐
+                     │           │
+                   Correct      Wrong
+                     │           │
+                     ▼           ▼
+                  Login      Increment
+                              failures
+                                 │
+                       ┌─────────┴─────────┐
+                       │                   │
+                    < limit             threshold
+                       │                   │
+                       ▼                   ▼
+                    Reject             Cooldown
+
+                    10 failures
+    ↓
+15-minute cooldown
+
+10 additional failures
+    ↓
+FLAG ACCOUNT
+
+5 additional failures
+    ↓
+LOCK ACCOUNT
+
+
+
+              FORGOT PASSWORD
+                    │
+                    ▼
+             IP Rate Limiter
+                    │
+                    ▼
+               Find User
+                │      │
+              found  not found
+                │      │
+                │      └──────► generic response
+                │
+                ▼
+             Generate OTP
+                │
+                ▼
+           Store OTP hash
+                │
+                ▼
+        Email / Push OTP
+
+
+        VERIFY OTP
+     │
+     ▼
+IP Rate Limiter
+     │
+     ▼
+Account password-reset state
+     │
+     ▼
+Wrong OTP?
+     │
+     ▼
+Increment attempts
+     │
+     ▼
+5 failures
+     │
+     ▼
+15-minute cooldown
+     │
+     ▼
+5 more failures
+     │
+     ▼
+FLAG ACCOUNT
+
+///////////////////
+Redis
+│
+├── cache
+│   └── marketplace listings
+│
+├── IP rate limiting
+│   ├── register
+│   ├── login
+│   ├── forgot password
+│   ├── verify OTP
+│   └── reset password
+│
+└── login security
+    ├── failed attempts
+    └── cooldown
+
+    ///////////////
+                LOGIN
+                   │
+            Wrong password
+                   ↓
+          Redis failed counter
+                   │
+       ┌───────────┼───────────┐
+       │           │           │
+      10          21          25
+       │           │           │
+   COOLDOWN      FLAGGED     LOCKED
+                               │
+                               ↓
+                        Forgot Password
+                               │
+                               ↓
+                           Correct OTP
+                               │
+                     ┌─────────┴─────────┐
+                     ↓                   ↓
+              Unlock account       Reset counter
+                     │                   │
+                     └─────────┬─────────┘
+                               ↓
+                         Reset Password
+                               ↓
+                         Normal account
