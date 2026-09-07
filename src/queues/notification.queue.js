@@ -1,22 +1,32 @@
 import { Queue } from "bullmq";
 import IORedis from "ioredis";
 
-const connection = new IORedis(process.env.REDIS_URL, {
-    maxRetriesPerRequest: null,
-});
+let notificationQueue;
 
-export const notificationQueue = new Queue("notifications", {
-    connection,
+const getNotificationQueue = () => {
+    if (!notificationQueue) {
+        const connection = new IORedis(process.env.REDIS_URL, {
+            maxRetriesPerRequest: null,
+        });
 
-    defaultJobOptions: {
-        attempts: 3,
+        notificationQueue = new Queue("notifications", {
+            connection,
 
-        backoff: {
-            type: "exponential",
-            delay: 5000,
-        },
+            defaultJobOptions: {
+                attempts: 3,
 
-        removeOnComplete: true,
-        removeOnFail: false,
-    },
-});
+                backoff: {
+                    type: "exponential",
+                    delay: 5000,
+                },
+
+                removeOnComplete: true,
+                removeOnFail: false,
+            },
+        });
+    }
+
+    return notificationQueue;
+};
+
+export default getNotificationQueue;

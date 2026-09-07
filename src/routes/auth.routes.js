@@ -33,12 +33,13 @@ import {
     verifyOtpRateLimiter,
     resetPasswordRateLimiter,
 } from "../utils/ipRateLimiters.js";
-import { notificationQueue } from "../queues/notification.queue.js";
+import getNotificationQueue from "../queues/notification.queue.js";;
 
 
 const router = express.Router();
 
 router.post("/test-notification-job", async (req, res) => {
+    const notificationQueue = getNotificationQueue();
     const job = await notificationQueue.add("test-notification", {
         message: "FarmConnect BullMQ test",
         createdAt: new Date().toISOString(),
