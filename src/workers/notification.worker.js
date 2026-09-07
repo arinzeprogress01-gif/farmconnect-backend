@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import IORedis from "ioredis";
 import "dotenv/config";
+
 const connection = new IORedis(process.env.REDIS_URL, {
     maxRetriesPerRequest: null,
 });
@@ -11,12 +12,11 @@ const notificationWorker = new Worker(
         console.log("Processing notification job:", job.id);
         console.log("Job data:", job.data);
 
-        // Notification processing will be added here.
-        // For now, we are only testing the queue-worker connection.
+        // Notification processing goes here.
 
         return {
             success: true,
-            processedAt: new Date(),
+            processedAt: new Date().toISOString(),
         };
     },
     {
@@ -36,7 +36,24 @@ notificationWorker.on("failed", (job, error) => {
 });
 
 notificationWorker.on("error", (error) => {
-    console.error("Notification worker error:", error);
+    console.error(
+        "Notification worker error:",
+        error
+    );
 });
 
 console.log("Notification worker started.");
+
+const shutdown = async (signal) => {
+    console.log(`${signal} received. Closing notification worker...`);
+
+    await notificationWorker.close();
+    await connection.quit();
+
+    console.log("Notification worker closed.");
+
+    process.exit(0);
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
