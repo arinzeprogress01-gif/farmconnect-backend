@@ -283,12 +283,12 @@ export const reserveListing = async (
 
         await queueNotification({
 
-            receiver: listing.vendorId,
+            receiver: vendorProfile.userId,
 
             title: "Listing Fully Reserved",
 
             message:
-                `${listing.foodName} has been fully reserved and is awaiting reservation completion.`,
+                `${listing.foodName} has been fully reserved and is awaiting reservation completion`,
 
             type: "listing",
 
@@ -843,9 +843,13 @@ export const cancelUserReservation = async (
     });
     // Vendor notification
 
+    const vendorProfile = await VendorProfile.findById(
+        listing.vendorId
+    ).select("userId");
+
     await queueNotification({
 
-        receiver: listing.vendorId,
+        receiver: vendorProfile.userId,
 
         title: "Reservation Cancelled",
 
