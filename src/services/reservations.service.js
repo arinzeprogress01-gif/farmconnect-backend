@@ -1,6 +1,6 @@
 import Reservation from "../models/reservation.model.js";
 import User from "../models/user.models.js";
-import sendNotification from "../utils/sendNotification.js";
+import { queueNotification } from "../utils/queueNotification.js";
 import { findVendorByUserId } from "../repositories/listing.repository.js";
 
 import {
@@ -216,10 +216,10 @@ export const reserveListing = async (
     */
 
     // Notify vendor.
-    await sendNotification({
+    await queueNotification({
 
         receiver:
-            listing.vendorId,
+            vendorProfile.userId,
 
         title:
             "New Reservation",
@@ -249,7 +249,7 @@ export const reserveListing = async (
     });
 
     // Notify user.
-    await sendNotification({
+    await queueNotification({
 
         receiver:
             user._id,
@@ -281,7 +281,7 @@ export const reserveListing = async (
     // Notify vendor if the listing is now completely reserved.
     if (listing.quantity === 0) {
 
-        await sendNotification({
+        await queueNotification({
 
             receiver: listing.vendorId,
 
@@ -484,7 +484,7 @@ export const cancelReservation = async (
 
     */
 
-    await sendNotification({
+    await queueNotification({
 
         receiver: reservation.user,
 
@@ -660,7 +660,7 @@ export const completeReservation = async (
         Email Notification
 
     */
-    await sendNotification({
+    await queueNotification({
 
         receiver: reservation.user,
 
@@ -843,7 +843,7 @@ export const cancelUserReservation = async (
     });
     // Vendor notification
 
-    await sendNotification({
+    await queueNotification({
 
         receiver: listing.vendorId,
 
@@ -866,7 +866,7 @@ export const cancelUserReservation = async (
 
     // User notification
 
-    await sendNotification({
+    await queueNotification({
 
         receiver: userId,
 
