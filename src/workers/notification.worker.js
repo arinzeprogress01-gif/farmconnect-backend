@@ -1,6 +1,7 @@
 import { Worker } from "bullmq";
 import IORedis from "ioredis";
 import "dotenv/config";
+import sendNotification  from "../utils/sendNotification.js";
 
 const connection = new IORedis(process.env.REDIS_URL, {
     maxRetriesPerRequest: null,
@@ -12,7 +13,7 @@ const notificationWorker = new Worker(
         console.log("Processing notification job:", job.id);
         console.log("Job data:", job.data);
 
-        // Notification processing goes here.
+        await sendNotification(job.data);
 
         return {
             success: true,
