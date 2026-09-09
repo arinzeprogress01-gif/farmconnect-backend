@@ -11,9 +11,6 @@ export const emitToUser = (
 ) => {
 
     if (!io) {
-        console.warn(
-            "Socket.IO is not initialized."
-        );
 
         return;
     }

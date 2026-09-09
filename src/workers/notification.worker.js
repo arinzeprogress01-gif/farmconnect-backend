@@ -4,7 +4,7 @@ import "dotenv/config";
 import sendNotification  from "../utils/sendNotification.js";
 import connectDB from "../config/database.config.js";
 
-const connection = new IORedis(process.env.REDIS_URL, {
+const connection = new IORedis(process.env.JOB_URL, {
     maxRetriesPerRequest: null,
 });
 

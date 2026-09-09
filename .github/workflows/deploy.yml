@@ -28,6 +28,7 @@ jobs:
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
+          JOB_URL: ${{ secrets.JOB_URL }}
 
       - name: Run ESLint
         run: npm run lint

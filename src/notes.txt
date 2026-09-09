@@ -1215,3 +1215,160 @@ Redis
                          │
                          ▼
              AI-powered backend systems
+
+             .......
+               there is an issue.. definitely the code spaceis running on a differetnt environment of its own and it snt connecting to redis, and not processing queues,,, now see,, i didnt get notiifcations at all in my tetsing ,,and i finally have network unlike last night and i ran the  npm on my local vs code and got this: npm run worker 
+ 
+> farmconnect-backend@1.0.0 worker 
+> node src/workers/notification.worker.js 
+ 
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com] 
+PROJECT: farmconnect-9d62e 
+EMAIL: firebase-adminsdk-fbsvc@farmconnect-9d62e.iam.gserviceaccount.com 
+PRIVATE: Loaded 
+IMPORTANT! Eviction policy is allkeys-lru. It should be "noeviction" 
+IMPORTANT! Eviction policy is allkeys-lru. It should be "noeviction" 
+Processing notification job: 7 
+Job data: { 
+  receiver: '6a71911c9aa1ca3db403deba', 
+  title: 'Listing Published', 
+  message: 'coffee has been published successfully.', 
+  type: 'listing', 
+  priority: 'medium', 
+  data: { listingId: 'FC-LST-00001', action: 'OPEN_MY_LISTINGS' } 
+} 
+✅ MongoDB Connected: ac-vagesgc-shard-00-00.uorm8ml.mongodb.net 
+Notification worker started. 
+Socket.IO is not initialized. 
+Notification job 7 completed. 
+Processing notification job: 8 
+Job data: { 
+  receiver: '6a71911c9aa1ca3db403deba', 
+  title: 'New Reservation', 
+  message: 'NNOLI ARINZE reserved 1 portion(s) of coffee.', 
+  type: 'reservation', 
+  priority: 'high', 
+  data: { 
+    reservationId: 'RSV-182855', 
+    listingId: 'FC-LST-00001', 
+    action: 'OPEN_VENDOR_RESERVATIONS' 
+  } 
+} 
+Socket.IO is not initialized. 
+Notification job 8 completed. 
+Processing notification job: 9 
+Job data: { 
+  receiver: '6a72690a947d1497cb6a4d51', 
+  title: 'Reservation Confirmed', 
+  message: 'Your reservation for coffee was successful. Pickup Code: 249427.', 
+  type: 'reservation', 
+  priority: 'high', 
+  data: { reservationId: 'RSV-182855', action: 'OPEN_MY_RESERVATIONS' } 
+} 
+Socket.IO is not initialized. 
+Notification job 9 completed. 
+Processing notification job: 10 
+Job data: { 
+  receiver: '6a71911c9aa1ca3db403deba', 
+  title: 'New Reservation', 
+  message: 'NNOLI ARINZE reserved 1 portion(s) of coffee.', 
+  type: 'reservation', 
+  priority: 'high', 
+  data: { 
+    reservationId: 'RSV-824882', 
+    listingId: 'FC-LST-00001', 
+    action: 'OPEN_VENDOR_RESERVATIONS' 
+  } 
+} 
+Socket.IO is not initialized. 
+Notification job 10 completed. 
+Processing notification job: 11 
+Job data: { 
+  receiver: '6a72690a947d1497cb6a4d51', 
+  title: 'Reservation Confirmed', 
+  message: 'Your reservation for coffee was successful. Pickup Code: 945785.', 
+  type: 'reservation', 
+  priority: 'high', 
+  data: { reservationId: 'RSV-824882', action: 'OPEN_MY_RESERVATIONS' } 
+} 
+Socket.IO is not initialized. 
+ 
+C:\Users\HomePC\Desktop\farmconnect-backend>Notification job 11 completed. 
+Processing notification job: 12 
+Job data: { 
+  receiver: '6a71911c9aa1ca3db403deba', 
+  title: 'New Reservation', 
+  message: 'NNOLI ARINZE reserved 1 portion(s) of coffee.', 
+  type: 'reservation', 
+  priority: 'high', 
+  data: { 
+    reservationId: 'RSV-155374', 
+    listingId: 'FC-LST-00001', 
+    action: 'OPEN_VENDOR_RESERVATIONS' 
+  } 
+} 
+Socket.IO is not initialized. 
+Notification job 12 completed. 
+Processing notification job: 13 
+Job data: { 
+  receiver: '6a72690a947d1497cb6a4d51', 
+  title: 'Reservation Confirmed', 
+  message: 'Your reservation for coffee was successful. Pickup Code: 426664.', 
+  type: 'reservation', 
+  priority: 'high', 
+  data: { reservationId: 'RSV-155374', action: 'OPEN_MY_RESERVATIONS' } 
+} 
+Socket.IO is not initialized. 
+Notification job 13 completed. 
+Processing notification job: 14 
+Job data: { 
+  receiver: '6a71911c9aa1ca3db403deba', 
+  title: 'New Reservation', 
+  message: 'NNOLI ARINZE reserved 1 portion(s) of coffee.', 
+  type: 'reservation', 
+  priority: 'high', 
+  data: { 
+    reservationId: 'RSV-751338', 
+    listingId: 'FC-LST-00001', 
+    action: 'OPEN_VENDOR_RESERVATIONS' 
+  } 
+} 
+Socket.IO is not initialized. 
+Notification job 14 completed. 
+Processing notification job: 15 
+Job data: { 
+  receiver: '6a72690a947d1497cb6a4d51', 
+  title: 'Reservation Confirmed', 
+  message: 'Your reservation for coffee was successful. Pickup Code: 762247.', 
+  type: 'reservation', 
+  priority: 'high', 
+  data: { reservationId: 'RSV-751338', action: 'OPEN_MY_RESERVATIONS' } 
+} 
+Socket.IO is not initialized. 
+Notification job 15 completed. 
+Processing notification job: 16 
+Job data: { 
+  receiver: '6a71911c9aa1ca3db403deba', 
+  title: 'New Reservation', 
+  message: 'NNOLI ARINZE reserved 1 portion(s) of coffee.', 
+  type: 'reservation', 
+  priority: 'high', 
+  data: { 
+    reservationId: 'RSV-156544', 
+    listingId: 'FC-LST-00001', 
+    action: 'OPEN_VENDOR_RESERVATIONS' 
+  } 
+} 
+Socket.IO is not initialized. 
+Notification job 16 completed. 
+Processing notification job: 17 
+Job data: { 
+  receiver: '6a72690a947d1497cb6a4d51', 
+  title: 'Reservation Confirmed', 
+  message: 'Your reservation for coffee was successful. Pickup Code: 485761.', 
+  type: 'reservation', 
+  priority: 'high', 
+  data: { reservationId: 'RSV-156544', action: 'OPEN_MY_RESERVATIONS' } 
+} 
+Socket.IO is not initialized. 
+Notification job 17 completed.............. immediately the notifications ,, all flooded my phone, backlog of jobs all queued up in redis database,, now this process a concern that render env aint running the worker ,, untll i ran it and it passed,, i know we removed from our api processes but this now its to get the whole live website to run it on it own ,,not needing npm install. i can create a different background worker instance for it,, i heard its paid.. we need a solution that wont ruin the structure,, remember we cant put it in the pipleline stream ,, because it opens and endless gate,, we need also to get the socket io not initilised notification to not show as it not a bug,, just the the code leaked in and pick up what it doesnt work with:.. as for the code base.. its not connecting to redis.. so my biggest concern right now its authomatic job completion and failure handling,, not manual npm run worker and server refreshes.. after 29 minutes, when i was off my system,on my way out, a reservation exoired and the notification came inn ,, so funny,means the worker ran,, so kina funny,, lets fix things
