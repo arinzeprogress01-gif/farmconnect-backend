@@ -6,6 +6,7 @@ import connectDB from "../config/database.config.js";
 
 const connection = new IORedis(process.env.JOB_URL, {
     maxRetriesPerRequest: null,
+    tls: {},
 });
 
 const notificationWorker = new Worker(
