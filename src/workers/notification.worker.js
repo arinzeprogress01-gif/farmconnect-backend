@@ -3,6 +3,7 @@ import IORedis from "ioredis";
 import "dotenv/config";
 import sendNotification  from "../utils/sendNotification.js";
 import connectDB from "../config/database.config.js";
+
 const connection = new IORedis(process.env.REDIS_URL, {
     maxRetriesPerRequest: null,
 });

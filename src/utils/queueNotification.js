@@ -8,6 +8,11 @@ export const queueNotification = async ({
     priority = "medium",
     data = {},
 }) => {
+    console.log("QUEUEING NOTIFICATION:", {
+        receiver,
+        title,
+        type,
+    });
     const notificationQueue = getNotificationQueue();
 
     await notificationQueue.add("send-notification", {

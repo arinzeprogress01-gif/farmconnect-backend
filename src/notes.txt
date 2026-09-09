@@ -1164,3 +1164,54 @@ Redis
                 Max attempts
                       ↓
               Failed / DLQ
+
+              //////////////////////// 
+
+                     RESERVATION
+                         │
+                         ▼
+                reserveListing()
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+      Database       Socket.IO      BullMQ Queue
+       changes       realtime          │
+                                       │
+                                       ▼
+                              Notification Worker
+                                       │
+                              ┌────────┴────────┐
+                              ▼                 ▼
+                         MongoDB          Firebase Push
+                       notification
+
+
+                       >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+                                           YOU ARE HERE
+                         ↓
+              JavaScript + Node + Express
+                         │
+                         ▼
+                  TypeScript ⭐
+                         │
+                         ▼
+               PostgreSQL + SQL
+                         │
+                         ▼
+                 Docker + Linux
+                         │
+                         ▼
+              AWS / Cloud Infrastructure
+                         │
+                         ▼
+          Testing + Observability + Security
+                         │
+                         ▼
+              System Design / Architecture
+                         │
+                         ▼
+              Distributed Systems
+                         │
+                         ▼
+             AI-powered backend systems
