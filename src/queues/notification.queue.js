@@ -7,7 +7,7 @@ let notificationQueue;
 
 const getNotificationQueue = () => {
     if (!notificationQueue) {
-        const connection = new IORedis(process.env.JOB_URL, {
+        const connection = new IORedis(process.env.REDIS_URL, {
             maxRetriesPerRequest: null,
             tls: {},
         });

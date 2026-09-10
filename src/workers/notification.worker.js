@@ -4,7 +4,7 @@ import "dotenv/config";
 import sendNotification  from "../utils/sendNotification.js";
 import connectDB from "../config/database.config.js";
 
-const connection = new IORedis(process.env.JOB_URL, {
+const connection = new IORedis(process.env.REDIS_URL, {
     maxRetriesPerRequest: null,
     tls: {},
 });
@@ -23,6 +23,14 @@ connection.on("error", (error) => {
 
 connection.on("reconnecting", () => {
     console.log("BullMQ Redis reconnecting...");
+});
+
+connection.on("close", () => {
+    console.log("BullMQ Redis connection closed.");
+});
+
+connection.on("end", () => {
+    console.log("BullMQ Redis connection ended.");
 });
 
 let notificationWorker;
