@@ -1,6 +1,6 @@
 import getNotificationQueue from "../queues/notification.queue.js";
 
-export const queueNotification = async ({
+export const queueNotification = ({
     receiver,
     title,
     message,
@@ -13,14 +13,25 @@ export const queueNotification = async ({
         title,
         type,
     });
+
     const notificationQueue = getNotificationQueue();
 
-    await notificationQueue.add("send-notification", {
-        receiver,
-        title,
-        message,
-        type,
-        priority,
-        data,
-    });
+    notificationQueue
+        .add("send-notification", {
+            receiver,
+            title,
+            message,
+            type,
+            priority,
+            data,
+        })
+        .then((job) => {
+            console.log("NOTIFICATION JOB ADDED:", job.id);
+        })
+        .catch((error) => {
+            console.error(
+                "Failed to queue notification:",
+                error.message
+            );
+        });
 };
