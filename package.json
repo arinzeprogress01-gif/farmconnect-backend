@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "start": "node src/server.js",
+    "start": "concurrently \"node src/server.js\" \"node src/workers/notification.worker.js\"",
     "d": "nodemon src/server.js",
     "seed-super-admin": "node scripts/seedSuperAdmin.js",
     "run": "node CI-CD/index.js",
@@ -39,12 +39,14 @@
     "node-cron": "^4.6.0",
     "openai": "^7.4.0",
     "redis": "^6.2.1",
+    "rxjs": "^7.8.2",
     "socket.io": "^4.8.3",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.5",
     "eslint": "^10.9.1",
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2"

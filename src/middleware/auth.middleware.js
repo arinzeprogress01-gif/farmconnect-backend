@@ -48,6 +48,8 @@ const authenticate = async (req, res, next) => {
 
     } catch (error) {
 
+        console.log(error);
+
         next(
             new UnauthorizedError(
                 "Invalid or expired token."

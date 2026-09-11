@@ -5,7 +5,8 @@ import sendNotification  from "../utils/sendNotification.js";
 import connectDB from "../config/database.config.js";
 
 const connection = new IORedis(process.env.REDIS_URL, {
-    maxRetriesPerRequest: null,
+    maxRetriesPerRequest: 1,
+    connectTimeout: 3000,
     tls: {},
 });
 

@@ -1,6 +1,6 @@
 const passwordResetTemplate = (
 
-    otp
+    //otp
 
 ) => {
 
