@@ -1,4 +1,4 @@
-import { Queue } from "bullmq";
+/*import { Queue } from "bullmq";
 import IORedis from "ioredis";
 import "dotenv/config";
 
@@ -8,7 +8,7 @@ let notificationQueue;
 const getNotificationQueue = () => {
     if (!notificationQueue) {
         const connection = new IORedis(process.env.REDIS_URL, {
-            maxRetriesPerRequest: 1,
+            maxRetriesPerRequest: null,
             connectTimeout: 3000,
             tls: {},
         });
@@ -34,3 +34,4 @@ const getNotificationQueue = () => {
 };
 
 export default getNotificationQueue;
+*/

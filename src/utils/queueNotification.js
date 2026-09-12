@@ -1,4 +1,4 @@
-import getNotificationQueue from "../queues/notification.queue.js";
+/*import getNotificationQueue from "../queues/notification.queue.js";
 
 export const queueNotification = ({
     receiver,
@@ -35,3 +35,4 @@ export const queueNotification = ({
             );
         });
 };
+*/

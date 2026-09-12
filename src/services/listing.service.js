@@ -37,7 +37,7 @@ import {
 } from "../utils/cacheInvalidation.js";
 
 import { emitToRole } from "../sockets/socket.events.js";
-import { queueNotification } from "../utils/queueNotification.js";
+//import { queueNotification } from "../utils/queueNotification.js";
 
 export const createNewListing = async (
 
@@ -246,7 +246,7 @@ export const createNewListing = async (
         listing: listing._id,
     });
     
-    await queueNotification ({
+    await sendNotification ({
 
         receiver: user._id,
 

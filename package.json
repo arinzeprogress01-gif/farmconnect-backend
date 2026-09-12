@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "start": "concurrently \"node src/server.js\" \"node src/workers/notification.worker.js\"",
+    "start": "node src/server.js",
     "d": "nodemon src/server.js",
     "seed-super-admin": "node scripts/seedSuperAdmin.js",
     "run": "node CI-CD/index.js",

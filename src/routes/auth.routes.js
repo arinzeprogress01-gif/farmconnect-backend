@@ -33,10 +33,10 @@ import {
     verifyOtpRateLimiter,
     resetPasswordRateLimiter,
 } from "../utils/ipRateLimiters.js";
-import getNotificationQueue from "../queues/notification.queue.js";;
-
+//import getNotificationQueue from "../queues/notification.queue.js";;
 
 const router = express.Router();
+/*
 
 router.post("/test-notification-job", async (req, res) => {
     const notificationQueue = getNotificationQueue();
@@ -51,6 +51,7 @@ router.post("/test-notification-job", async (req, res) => {
         jobId: job.id,
     });
 });
+*/
 
 router.post(
     "/register",
